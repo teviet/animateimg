@@ -5,6 +5,24 @@
 // 2>&-#################################################################
 // 2>&-; awk '/^<\/MARKDOWN>/{f=0};f;/^<MARKDOWN>/{f=1}' $0; exit 0
 
+/***********************************************************************
+animateimg.js
+Copyright (c) 2016 Teviet Creighton.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+***********************************************************************/
+
 /*
 <MARKDOWN>
 # animateIMG(3)
@@ -322,7 +340,7 @@ function animateIMG( srcList, params ) {
 	return;
     if ( ret.max == 1 ) {
 	thisImage = document.createElement( "IMG" );
-	thisImage.setAttribute( "src", srcList[0] );
+	thisImage.src = srcList[0];
 	frame.appendChild( thisImage );
 	return { reset: function(){ frame.removeChild( thisImage ); } };
     }
@@ -358,15 +376,20 @@ function animateIMG( srcList, params ) {
        visibility of the controls.) */
     var controls = document.createElement( "DIV" );
     var back = document.createElement( "IMG" );
-    back.setAttribute( "src", dir + "back.png" );
-    back.setAttribute( "style", "position: absolute; bottom: 0px;" +
-		       " left: 0px; height: 20px; width: " +
-		       panelWidth + "px;" );
+    back.src = dir + "back.png";
+    back.style.position = "absolute";
+    back.style.bottom = "0px";
+    back.style.left = "0px";
+    back.style.height = "20px";
+    back.style.width = panelWidth + "px";
     controls.appendChild( back );
     var bar = document.createElement( "IMG" );
-    bar.setAttribute( "src", dir + "bar.png" );
-    bar.setAttribute( "style", "position: absolute; bottom: 0px;" +
-		      " left: 0px; height: 20px; width: 0px;" );
+    bar.src = dir + "bar.png";
+    bar.style.position = "absolute";
+    bar.style.bottom = "0px";
+    bar.style.left = "0px";
+    bar.style.height = "20px";
+    bar.style.width = "0px";
     controls.appendChild( bar );
     panel.appendChild( controls );
 
@@ -381,17 +404,17 @@ function animateIMG( srcList, params ) {
     var button6 = document.createElement( "IMG" );   // loop/noloop
     var scrollbar = document.createElement( "IMG" ); // scrollbar
     var slider = document.createElement( "IMG" );    // scrolling slider
-    button1.setAttribute( "src", dir + "rr.png" );  
-    button2.setAttribute( "src", dir + "pause.png" );
-    button3.setAttribute( "src", dir + "ff.png" );
-    button4.setAttribute( "src", dir + "home.png" )
-    button5.setAttribute( "src", dir + "end.png" );
+    button1.src = dir + "rr.png";
+    button2.src = dir + "pause.png";
+    button3.src = dir + "ff.png";
+    button4.src = dir + "home.png";
+    button5.src = dir + "end.png";
     if ( ret.loop )
-	button6.setAttribute( "src", dir + "loop.png" );
+	button6.src = dir + "loop.png";
     else
-	button6.setAttribute( "src", dir + "noloop.png" );
-    scrollbar.setAttribute( "src", dir + "scrollbar.png" );
-    slider.setAttribute( "src", dir + "slider.png" );
+	button6.src = dir + "noloop.png";
+    scrollbar.src = dir + "scrollbar.png";
+    slider.src = dir + "slider.png";
 
     /* Start loading images.  The imageLoaded() callback will handle
        starting the animation once everything is loaded. */
@@ -399,7 +422,7 @@ function animateIMG( srcList, params ) {
 	thisImage = document.createElement( "IMG" );
 	thisImage.onload = imageLoaded;
 	thisImage.onerror = imageLoaded;
-	thisImage.setAttribute( "src", srcList[i] );
+	thisImage.src = srcList[i];
 	if ( imclass )
 	    thisImage.className = imclass;
 	images.push( thisImage );
@@ -438,29 +461,24 @@ function animateIMG( srcList, params ) {
 	   the subframe is explicitly sized to the maximum dimensions
 	   of the loaded images.  This also allows the frame to be
 	   given a size while images are still loading. */
-	if ( event.target.width > imwidth ||
-	     event.target.height > imheight ) {
-	    if ( event.target.width > imwidth )
-		imwidth = event.target.width;
-	    if ( event.target.height > imheight )
-		imheight = event.target.height;
-	    subframe.setAttribute( "style", "width: " + imwidth + "px;" +
-				   " height: " + imheight + "px;" );
+	if ( event.target.width > imwidth ) {
+	    imwidth = event.target.width;
+	    subframe.style.width = imwidth + "px";
+	}
+	if ( event.target.height > imheight ) {
+	    imheight = event.target.height;
+	    subframe.style.height = imheight + "px";
 	}
 	/* Control panel may resize as images load; e.g. due to frame
 	   resizing above (if panel is within the frame or otherwise
 	   affected by the frame position). */
 	panelWidth = panel.offsetWidth;
-	back.setAttribute( "style", "position: absolute;" +
-			   " bottom: 0px; left: 0px; height: 20px;" +
-			   " width: " + panelWidth + "px;" );
+	back.style.width = panelWidth + "px";
 
 	/* If images are still loading, we adjust progress bar as each
 	   image loads. */
 	if ( ret.count < ret.max ) {
-	    bar.setAttribute( "style", "position: absolute; bottom: 0px;" +
-			      " left: 0px; height: 20px; width: " +
-			      panelWidth*ret.count/ret.max + "px;" );
+	    bar.style.width = panelWidth*ret.count/ret.max + "px";
 	    //if ( ret.count % 50 == 0 )
 	    //alert( "Images loaded: " + ret.count );
 	}
@@ -483,12 +501,12 @@ function animateIMG( srcList, params ) {
 	       over it. */
 	    controls.removeChild( bar );
 	    if ( panel == frame ) {
-		controls.setAttribute( "style", "visibility: hidden;" );
+		controls.style.visibility = "hidden";
 		panel.onmouseover = function() {
-		    controls.setAttribute( "style", "visibility: visible;" );
+		    controls.style.visibility = "visible";
 		};
 		panel.onmouseout = function() {
-		    controls.setAttribute( "style", "visibility: hidden;" );
+		    controls.style.visibility = "hidden";
 		};
 	    };
  
@@ -497,40 +515,37 @@ function animateIMG( srcList, params ) {
 	       slider). */
 	    if ( panelWidth > 124 ) {
 		sliderstep = ( panelWidth - 124 )/( ret.max - 1 );
-		back.setAttribute( "style", "position: absolute;" +
-				   " bottom: 0px; left: 0px;" +
-				   " height: 20px; width: " +
-				   panelWidth + "px;" );
+		back.style.width = panelWidth + "px";
 
 		/* Set placement for control buttons. */
-		button1.setAttribute( "style", "position: absolute;" +
-				      " bottom: 0px; left: 0px;" +
-				      " width: 20px; height: 20px;" );
-		button2.setAttribute( "style", "position: absolute;" +
-				      " bottom: 0px; left: 20px;" +
-				      " width: 20px; height: 20px;" );
-		button3.setAttribute( "style", "position: absolute;" +
-				      " bottom: 0px; left: 40px;" +
-				      " width: 20px; height: 20px;" );
-		button4.setAttribute( "style", "position: absolute;" +
-				      " bottom: 0px; left: " +
-				      ( panelWidth - 60 ) + "px;" +
-				      " width: 20px; height: 20px;" );
-		button5.setAttribute( "style", "position: absolute;" +
-				      " bottom: 0px; left: " +
-				      ( panelWidth - 40 ) + "px;" +
-				      " width: 20px; height: 20px;" );
-		button6.setAttribute( "style", "position: absolute;" +
-				      " bottom: 0px; left: " +
-				      ( panelWidth - 20 ) + "px;" +
-				      " width: 20px; height: 20px;" );
-		slider.setAttribute( "style", "position: absolute;" +
-				     " bottom: 0px; left: 60px;" +
-				     " width: 4px; height: 20px;" );
-		scrollbar.setAttribute( "style", "position: absolute;" +
-					" bottom: 0px; left: 60px;" +
-					" height: 20px; width: " +
-					( panelWidth - 120 ) + "px;" );
+		button1.style.position = button2.style.position =
+		    button3.style.position = button4.style.position =
+		    button5.style.position = button6.style.position =
+		    slider.style.position = scrollbar.style.position =
+		    "absolute";
+		button1.style.bottom = button2.style.bottom =
+		    button3.style.bottom = button4.style.bottom =
+		    button5.style.bottom = button6.style.bottom =
+		    slider.style.bottom = scrollbar.style.bottom =
+		    "0px";
+		button1.style.height = button2.style.height =
+		    button3.style.height = button4.style.height =
+		    button5.style.height = button6.style.height =
+		    slider.style.height = scrollbar.style.height =
+		    "20px";
+		button1.style.width = button2.style.width =
+		    button3.style.width = button4.style.width =
+		    button5.style.width = button6.style.width =
+		    "20px";
+		slider.style.width = "4px";
+		scrollbar.style.width = ( panelWidth - 120 ) + "px";
+		button1.style.left = "0px";
+		button2.style.left = "20px";
+		button3.style.left = "40px";
+		button4.style.left = ( panelWidth - 60 ) + "px";
+		button5.style.left = ( panelWidth - 40 ) + "px";
+		button6.style.left = ( panelWidth - 20 ) + "px";
+		scrollbar.style.left = slider.style.left = "60px";
 
 		/* Since we'll be using drag-like events to scroll the
 		   animation, we don't want the brouser to think we're
@@ -567,9 +582,9 @@ function animateIMG( srcList, params ) {
 		button6.onclick = function() {
 		    ret.loop = !ret.loop;
 		    if ( ret.loop ) {
-			button6.setAttribute( "src", dir + "loop.png" );
+			button6.src = dir + "loop.png";
 		    } else {
-			button6.setAttribute( "src", dir + "noloop.png" );
+			button6.src = dir + "noloop.png";
 		    }
 		};
 		scrollbar.onmousedown = startScrolling;
@@ -664,9 +679,7 @@ function animateIMG( srcList, params ) {
 	    subframe.appendChild( thisImage );
 	    subframe.removeChild( thatImage );
 	}
-	slider.setAttribute( "style", "position: absolute; bottom: 0px;" +
-			     " left: " + ( 60 + sliderstep*ret.count ) +
-			     "px;" );
+	slider.style.left = ( 60 + sliderstep*ret.count ) + "px";
     }
 
     /* This function is called when the play button is clicked.  It
@@ -675,7 +688,7 @@ function animateIMG( srcList, params ) {
        whilePlaying() every cadence ms. */
     function play() {
 	ret.paused = false;
-	button1.setAttribute( "src", dir + "rr.png" );
+	button1.src = dir + "rr.png";
 	button1.onmousedown = function( event ) {
 	    if ( event.which == 1 ) { ret.stride = -ret.speedup; }
 	};
@@ -688,11 +701,11 @@ function animateIMG( srcList, params ) {
 	button1.onmouseleave = function( event ) {
 	    if ( event.which == 1 ) { ret.stride = 1; }
 	};
-	button2.setAttribute( "src", dir + "pause.png" );
+	button2.src = dir + "pause.png";
 	button2.onclick = function( event ) {
 	    if ( event.which == 1 ) { pause(); }
 	};
-	button3.setAttribute( "src", dir + "ff.png" );
+	button3.src = dir + "ff.png";
 	button3.onmousedown = function( event ) {
 	    if ( event.which == 1 ) { ret.stride = ret.speedup; }
 	};
@@ -716,15 +729,15 @@ function animateIMG( srcList, params ) {
        various control buttons. */
     function pause() {
 	ret.paused = true;
-	button1.setAttribute( "src", dir + "rstep.png" );
+	button1.src = dir + "rstep.png";
 	button1.onclick = function( event ) {
 	    if ( event.which == 1 ) { seek( ret.count - 1 ); }
 	};
-	button2.setAttribute( "src", dir + "play.png" );
+	button2.src = dir + "play.png";
 	button2.onclick = function( event ) {
 	    if ( event.which == 1 ) { play(); }
 	};
-	button3.setAttribute( "src", dir + "fstep.png" );
+	button3.src = dir + "fstep.png";
 	button3.onclick = function( event ) {
 	    if ( event.which == 1 ) { seek( ret.count + 1 ); }
 	};
@@ -779,7 +792,7 @@ function animateIMGplain( srcList, params ) {
 	return;
     if ( ret.max == 1 ) {
 	thisImage = document.createElement( "IMG" );
-	thisImage.setAttribute( "src", srcList[0] );
+	thisImage.src = srcList[0];
 	frame.appendChild( thisImage );
 	return { reset: function(){ frame.removeChild( thisImage ); } };
     }
@@ -796,7 +809,7 @@ function animateIMGplain( srcList, params ) {
 	var thisImage = document.createElement( "IMG" );
 	thisImage.addEventListener( "load", imageLoaded );
 	thisImage.addEventListener( "error", imageLoaded );
-	thisImage.setAttribute( "src", srcList[i] );
+	thisImage.src = srcList[i];
 	if ( imclass )
 	    thisImage.className = imclass;
 	images.push( thisImage );
@@ -823,7 +836,7 @@ function animateIMGplain( srcList, params ) {
        image is loaded.  When the final image is loaded, it replaces
        the progress bar with the control buttons, and starts the
        animation. */
-    function imageLoaded() {
+    function imageLoaded( event ) {
 	/* count keeps track of number of images loaded.  After all
 	   images have been loaded, it will be retasked to keep track
 	   of current playback frame, */
@@ -832,13 +845,13 @@ function animateIMGplain( srcList, params ) {
 	   the subframe is explicitly sized to the maximum dimensions
 	   of the loaded images.  This also allows the frame to be
 	   given a size while images are still loading. */
-	if ( this.width > imwidth || this.height > imheight ) {
-	    if ( this.width > imwidth )
-		imwidth = this.width;
-	    if ( this.height > imheight )
-		imheight = this.height;
-	    subframe.setAttribute( "style", "width: " + imwidth + "px;" +
-				   " height: " + imheight + "px;" );
+	if ( event.target.width > imwidth ) {
+	    imwidth = event.target.width;
+	    subframe.style.width = imwidth + "px";
+	}
+	if ( event.target.height > imheight ) {
+	    imheight = event.target.height;
+	    subframe.style.height = imheight + "px";
 	}
 	/* If all images are loaded, set up mouse events and run
 	   animation. */
