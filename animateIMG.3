@@ -1,0 +1,250 @@
+.TH ANIMATEIMG 3 
+.SH  "NAME"
+.PP
+\fB\fCanimateIMG\fR - display animated image sequence with javascript
+.SH  "SYNOPSIS"
+.PP
+\fB\fC<script src="animateimg.js"></script>\fR
+.PP
+\fB\fCfunction animateIMG(\fR \fIsrcList\fR\fB\fC,\fR \fIparams\fR \fB\fC);\fR
+.SH  "DESCRIPTION"
+.PP
+This function takes a sequence of images and produces an animation by
+displaying them in succession within a specified container element
+such as \fB\fC<div>\fR, \fB\fC<span>\fR, or \fB\fC<td>\fR (the "frame")\[char46] The images are
+specified by an array of strings \fIsrcList\fR that will be loaded and
+then displayed in the frame. The \fIparams\fR object is a structure whose
+members control the placement and other properties of the animation.
+.PP
+For instance, if you have assigned the frame an \fB\fCid\fR attribute, then
+you may set \fIparams\fR\fB\fC\[char46]id\fR to that value in order to display the
+animation in that element. Alternatively, if you have the frame
+element object in the HTML Document Object Model, then you can assign
+\fIparams\fR\fB\fC\[char46]frame\fR to that object, which takes precedence over the
+\fIparams\fR\[char46]\fB\fCid\fR field.
+.PP
+By default, the animation loops indefinitely, but can be paused by
+clicking in the frame. Other \fIparams\fR fields can modify this
+behaviour: see below.
+.PP
+Additionally, you can give the animation a "control panel" by pointing
+it to a container element (usually a \fB\fC<div>\fR element), either by
+assigning its \fB\fCid\fR property to \fIparams\fR\fB\fC\[char46]panelID\fR, or the HTML DOM
+element itself to \fIparams\fR\fB\fC\[char46]panel\fR\[char46] The panel must be a positioned
+element (i.e. have an explicit non-static \fB\fCposition:\fR property in its
+style), and must have a width of more than 124 pixels wide at the time
+the animation starts; otherwise \fB\fCanimateIMG\fR reverts to a plain
+unadorned animation.
+.PP
+The panel and frame elements may be the same element, in which case
+\fB\fCanimateIMG\fR takes the additional step of hiding the panel when the
+mouse is outside of the frame.
+.PP
+Note also that the size of the animation is not controled by the frame
+container. Use the \fIparams\fR\fB\fC\[char46]class\fR parameter to apply dimensions and
+other styles to the animated images.
+.SS  "Parameters: Plain Animation"
+.PP
+The following parameters are used when displaying an animation without
+a control panel. As noted, only \fIsrcList\fR and one of \fIparams\fR\fB\fC\[char46]frame\fR
+or \fIparams\fR\fB\fC\[char46]frameID\fR are required; the rest are optional (with the
+specified defaults)\[char46]
+
+.RS
+.EX
+Parameter         Type     Description
+----------------------------------------------------------------
+srcList           array    Array of image src strings  
+params.frame      element  element to contain animation 
+params.frameID    string   ID of element to contain animation
+params.imclass    string   CSS class applied to images (none)
+params.paused     boolean  Whether initially paused (false)
+params.clickable  boolean  Whether clicking frame pauses (true)
+params.cadence    number   Time in ms between frames (40)
+params.loopcount  number   # of times animation will play (0)
+.EE
+.RE
+.PP
+Note that \fIparams\fR\fB\fC\[char46]loopcount=0\fR means the animation will loop
+indefinitely. If \fIparams\fR\fB\fC\[char46]clickable\fR is \fB\fCfalse\fR then
+\fIparams\fR\fB\fC\[char46]paused\fR is ignored, unless the animation has a control panel
+(below)\[char46]
+.SS  "Parameters: Animation With Control Panel"
+.PP
+When a control panel is present, the user can toggle whether the
+animation loops or not. The \fIparams\fR\fB\fC\[char46]loopcount\fR property is ignored
+except to set the initial state of the looping toggle: "off" if
+\fIparams\fR\fB\fC\[char46]loopcount\fR is 1, "on" if it is anything else. The following
+additional parameters are used, though only one of
+\fIparams\fR\fB\fC\[char46]container\fR or \fIparams\fR\fB\fC\[char46]containerID\fR is required.
+
+.RS
+.EX
+Parameter         Type     Description
+----------------------------------------------------------------
+params.panel      element  Element to place controls
+params.panelID    string   ID of element to place controls
+parame.icons      string   directory containing button icons (.)
+params.speedup    number   Frame stride in fast-forward (5)
+.EE
+.RE
+.SS  "Installing"
+.PP
+To use animations, simply place the \fB\fCanimateimg.js\fR in a
+browser-accessible directory, note its URL, and load it in pages using
+a \fB\fC<script src="\fR\fIURL\fR\fB\fC"></script>\fR element. Animations with control
+panels also need button icons; see the \fBFiles\fR section, below.
+.PP
+The \fB\fCanimateimg.js\fR file also contains the source code documentation,
+including this document. Running \fB\fCbash animateimg.js > README.md\fR
+will extract the (markdown-formatted) documentation. The
+\fB\fCREADME.html\fR demo page and \fB\fCanimateIMG.3\fR Unix manpage included with
+this distribution were generated from the \fB\fCREADME.md\fR using standard
+converters.
+.SH  "RETURN VALUE"
+.PP
+If \fB\fCanimateIMG\fR encounters an error parsing \fIparams\fR, then it returns
+\fB\fCundefined\fR\[char46] Otherwise, it returns an object containing several state
+parameters and methods for interacting with the animation. Normally
+this can be ignored unless you plan to write additional javascript
+code or handlers to interact with the animation. The returned object
+has the the following properties:
+
+.RS
+.EX
+Property   Type      Description
+----------------------------------------------------------------
+count      number    Current frame displayed
+max        number    Total number of frames to be displayed
+paused     boolean   Whether currently paused
+loop       boolean   Whether currently set to loop
+loopcount  number    Requested number of loops (rounded)
+loopno     number    Current loop number
+stride     number    Current frame stride
+speedup    number    Frame stride to be used in fast-forward
+cadence    number    Current time in ms between frames
+play()     function  Runs animation
+pause()    function  Pauses/stops animation
+seek(n)    function  Jumps to frame n
+reset()    function  Restores state before calling animation
+.EE
+.RE
+.SH  "FILES"
+.PP
+The default buttons and other icons for the control panel are given in
+the \fB\fCicons\fR subdirectory of this distribution, and are linked below;
+note that most are pure white PNGs with variable opacity, intended to
+be viewed on a dark background (such as the \fB\fCback.png\fR image used in
+the control panel)\[char46]
+.PP
+
+ (icons/home.png)
+ (icons/rr.png)
+ (icons/rstep.png)
+ (icons/pause.png)
+ (icons/play.png)
+ (icons/fstep.png)
+ (icons/ff.png)
+ (icons/end.png)
+ (icons/loop.png)
+ (icons/noloop.png)
+ (icons/back.png)
+ (icons/bar.png)
+ (icons/scrollbar.png)
+ (icons/slider.png)
+.PP
+You will likely want to copy these to a suitable browser-viewable
+directory. The URL of the icon directory can be specified
+per-animation basis with the \fIparams\fR\fB\fC\[char46]icons\fR parameter. If
+\fIparams\fR\fB\fC\[char46]icons\fR is not specified, the animation will use a default
+global variable declared in \fB\fCanimateimg.js\fR:
+
+.RS
+.EX
+var animateimg_default_icons = "";
+.EE
+.RE
+.PP
+You may edit this as necessary for your own installation. A value of
+"" means that \fB\fCanimateIMG\fR will look for icons in the same directory
+as the page being viewed; relative URLs are also possible. You may
+also create your own icons, either globally or on a per-page or
+per-animation basis.
+.SH  "NOTES"
+.PP
+The function will set the \fB\fConmouseover\fR and \fB\fConmouseout\fR properties of
+the control panel element. These properties are saved and restored if
+the returned object's 
+.BR \fB\fCreset ()\fR
+method is called. Other properties of
+this element are left unchanged. The animation will \fInot\fR inherit the
+size of the container; use the \fIparams\fR\fB\fC\[char46]imclass\fR parameter to apply
+styles to the animation images.
+.PP
+If \fIsrcList\fR contains only a single entry, then \fB\fCanimateIMG\fR does not
+perform any animation; it simply loads that image into the frame. In
+this case the returned object contains only a single property, the
+.BR \fB\fCreset ()\fR
+method, which restores the original \fB\fCsrc\fR property of the
+frame.
+.SH  "EXAMPLE"
+.PP
+The following HTML snippet loads the 
+.BR \fB\fCanimateIMG ()\fR
+function, and also
+places the images \fB\fCexample/image_1.png\fR through
+\fB\fCexample/image_250.png\fR into the \fB\fCimglist\fR array:
+
+.RS
+.EX
+<script src="animateimg.js"></script>
+<script>
+var i, imglist = [];
+for ( i = 1; i <= 250; i++ )
+    imglist.push( "example/image_" + i + ".png" );
+</script>
+.EE
+.RE
+.PP
+The simplest way to display the default (looping, click-to-pause)
+animation of these images is to place an empty \fB\fC<div>\fR elemend with an
+\fB\fCid\fR attribute at the desired location on the page, and pass the image
+list and ID to 
+.BR \fB\fCanimateIMG ()\fR:
+
+.RS
+.EX
+<div id="anim1"></div>
+<script>
+animateIMG( imglist, { frameID: "anim1" } );
+</script>
+.EE
+.RE
+.PP
+To give the animation a full set of controls, specify a positioned
+container with a known or calculable width (e.g. a \fB\fC<div>\fR or \fB\fC<td>\fR
+element , not a \fB\fC<span>\fR element)\[char46] This may be the same container as
+the one holding the animation itself, in which case the controls will
+appear when you hover over the animation. Be sure to give it a
+non-static \fB\fCposition:\fR style; a \fB\fC<div>\fR may also need to be specified
+with \fB\fCdisplay: inline-block;\fR to allow it to resize according to its
+contents. E.g.
+
+.RS
+.EX
+<div style="position: relative; display: inline-block;"
+     id="anim2"></div>
+<script>
+animateIMG( imglist, { frameID: "anim2", panelID: "anim2",
+                       icons: "icons" } );
+</script>
+.EE
+.RE
+.PP
+Although they display the same set of images, the two animations run
+in separate \fB\fC<div>\fR frames, and the two calls to \fB\fCanimateIMG\fR create
+separate instances of the underlying objects. Thus, the animations
+run completely independent of one another.
+.SH  "SEE ALSO"
+.PP
+W3Schools (http://www.w3schools.com)
