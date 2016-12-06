@@ -397,8 +397,8 @@ function animateIMG( srcList, params ) {
        starting the animation once everything is loaded. */
     for ( i = 0; i < ret.max; i++ ) {
 	thisImage = document.createElement( "IMG" );
-	thisImage.addEventListener( "load", imageLoaded );
-	thisImage.addEventListener( "error", imageLoaded );
+	thisImage.onload = imageLoaded;
+	thisImage.onerror = imageLoaded;
 	thisImage.setAttribute( "src", srcList[i] );
 	if ( imclass )
 	    thisImage.className = imclass;
@@ -429,7 +429,7 @@ function animateIMG( srcList, params ) {
        image is loaded.  When the final image is loaded, it replaces
        the progress bar with the control buttons, and starts the
        animation. */
-    function imageLoaded() {
+    function imageLoaded( event ) {
 	/* count keeps track of number of images loaded.  After all
 	   images have been loaded, it will be retasked to keep track
 	   of current playback frame, */
@@ -438,11 +438,12 @@ function animateIMG( srcList, params ) {
 	   the subframe is explicitly sized to the maximum dimensions
 	   of the loaded images.  This also allows the frame to be
 	   given a size while images are still loading. */
-	if ( this.width > imwidth || this.height > imheight ) {
-	    if ( this.width > imwidth )
-		imwidth = this.width;
-	    if ( this.height > imheight )
-		imheight = this.height;
+	if ( event.target.width > imwidth ||
+	     event.target.height > imheight ) {
+	    if ( event.target.width > imwidth )
+		imwidth = event.target.width;
+	    if ( event.target.height > imheight )
+		imheight = event.target.height;
 	    subframe.setAttribute( "style", "width: " + imwidth + "px;" +
 				   " height: " + imheight + "px;" );
 	}
