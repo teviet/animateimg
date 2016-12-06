@@ -162,9 +162,14 @@ the control panel).
 [<img src=icons/scrollbar.png>](icons/scrollbar.png)</span>
 [<img src=icons/slider.png>](icons/slider.png)</span>
 
-You will likely want to copy these to a suitable browser-viewable
-directory.  The URL of the icon directory can be specified
-per-animation basis with the _params_`.icons` parameter.  If
+(Note that if you're viewing this file as `README.md` on GitHub, the
+above icons will be nearly-invisible white-on-white.  Cloning the
+repository and viewing `README.html` will show the icons properly, and
+also display the demo animations in the **Example** section.)
+
+You will likely want to copy these icons to a suitable
+browser-viewable directory.  The URL of the icon directory can be
+specified per-animation basis with the _params_`.icons` parameter.  If
 _params_`.icons` is not specified, the animation will use a default
 global variable declared in `animateimg.js`:
 
