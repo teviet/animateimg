@@ -207,8 +207,7 @@ places the images `example/image_1.png` through
 <script>
 var i, imglist = [];
 for ( i = 1; i <= 250; i++ )
-//    imglist.push( "example/image_" + i + ".png" );
-      imglist.push( "http://www.tapir.caltech.edu/~teviet/AnimateIMG/image_" + i + ".png" );
+    imglist.push( "example/image_" + i + ".png" );
 </script>
 
 The default (looping, click-to-pause) animation simply places these
@@ -222,7 +221,7 @@ have a "preview" image::
 
 <img id="im1" src="example/preview1.png">
 <script>
-animateIMG( imglist, { imgID: "im1", loopcount: 2 } );
+animateIMG( imglist, { imgID: "im1" } );
 </script>
 
 To give the animation a full set of controls, specify a positioned
