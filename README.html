@@ -13,18 +13,18 @@
 <h2>Description</h2>
 
 <p>This function takes a sequence of images and produces an animation by
-displaying them in succession within a specified container element
-such as <code>&lt;div&gt;</code>, <code>&lt;span&gt;</code>, or <code>&lt;td&gt;</code> (the &quot;frame&quot;). The images are
-specified by an array of strings <em>srcList</em> that will be loaded and
-then displayed in the frame. The <em>params</em> object is a structure whose
-members control the placement and other properties of the animation.</p>
+displaying them in succession within a specified <code>&lt;img&gt;</code> element. The
+images are specified by an array of strings <em>srcList</em> that will be
+loaded and then displayed in the frame. The <em>params</em> object is a
+structure whose members control the placement and other properties of
+the animation.</p>
 
-<p>For instance, if you have assigned the frame an <code>id</code> attribute, then
-you may set <em>params</em><code>.id</code> to that value in order to display the
-animation in that element. Alternatively, if you have the frame
-element object in the HTML Document Object Model, then you can assign
-<em>params</em><code>.frame</code> to that object, which takes precedence over the
-<em>params</em>.<code>id</code> field.</p>
+<p>For instance, if you have assigned the <code>&lt;img&gt;</code> element an <code>id</code>
+attribute, then you may set <em>params</em><code>.imgID</code> to that value in order to
+display the animation in that element. Alternatively, if you have the
+frame element object in the HTML Document Object Model, then you can
+assign <em>params</em><code>.img</code> to that object, which takes precedence over the
+<em>params</em>.<code>imgID</code> field.</p>
 
 <p>By default, the animation loops indefinitely, but can be paused by
 clicking in the frame. Other <em>params</em> fields can modify this
@@ -39,37 +39,41 @@ style), and must have a width of more than 124 pixels wide at the time
 the animation starts; otherwise <code>animateIMG</code> reverts to a plain
 unadorned animation.</p>
 
-<p>The panel and frame elements may be the same element, in which case
-<code>animateIMG</code> takes the additional step of hiding the panel when the
-mouse is outside of the frame.</p>
+<p>It is common to place the image element within the panel element, so
+that the controls overlay the animation. Setting the <em>params</em><code>.hide</code>
+parameter will cause the controls to display only when you mouse over
+the panel.</p>
 
-<p>Note also that the size of the animation is not controled by the frame
-container. Use the <em>params</em><code>.class</code> parameter to apply dimensions and
-other styles to the animated images.</p>
+<p>The animation will inherit any styling associated with the <code>&lt;img&gt;</code>
+element, such as explicit dimensions. It is also common to initialize
+the <code>&lt;img&gt;</code> tag with a &quot;preview&quot; image to display while the animation
+is loading: that image will be replaced with the animation once all
+animation frames have been loaded.</p>
 
 <h3>Parameters: Plain Animation</h3>
 
 <p>The following parameters are used when displaying an animation without
-a control panel. As noted, only <em>srcList</em> and one of <em>params</em><code>.frame</code>
-or <em>params</em><code>.frameID</code> are required; the rest are optional (with the
+a control panel. As noted, only <em>srcList</em> and one of <em>params</em><code>.img</code>
+or <em>params</em><code>.imgID</code> are required; the rest are optional (with the
 specified defaults).</p>
 
 <pre><code>Parameter         Type     Description
 ----------------------------------------------------------------
 srcList           array    Array of image src strings  
-params.frame      element  element to contain animation 
-params.frameID    string   ID of element to contain animation
-params.imclass    string   CSS class applied to images (none)
+params.img        element  element to contain animation 
+params.imgID      string   ID of element to contain animation
 params.paused     boolean  Whether initially paused (false)
 params.clickable  boolean  Whether clicking frame pauses (true)
 params.cadence    number   Time in ms between frames (40)
 params.loopcount  number   # of times animation will play (0)
 </code></pre>
 
-<p>Note that <em>params</em><code>.loopcount=0</code> means the animation will loop
-indefinitely. If <em>params</em><code>.clickable</code> is <code>false</code> then
-<em>params</em><code>.paused</code> is ignored, unless the animation has a control panel
-(below).</p>
+<p>Note that a non-positive <em>params</em><code>.loopcount=0</code> means the animation
+will loop indefinitely. Once the animation reaches its designated
+loopcount, it will pause; if <em>params</em><code>.clickable</code> is true then
+clicking at the end of a loop sequence will start a new sequence. If
+<em>params</em><code>.clickable</code> is <code>false</code> then <em>params</em><code>.paused</code> is ignored,
+unless the animation has a control panel (below).</p>
 
 <h3>Parameters: Animation With Control Panel</h3>
 
@@ -86,6 +90,7 @@ params.panel      element  Element to place controls
 params.panelID    string   ID of element to place controls
 parame.icons      string   directory containing button icons (.)
 params.speedup    number   Frame stride in fast-forward (5)
+parame.hidden     boolean  Show panel only when hovering (false)
 </code></pre>
 
 <h3>Installing</h3>
@@ -113,8 +118,8 @@ has the the following properties:</p>
 
 <pre><code>Property   Type      Description
 ----------------------------------------------------------------
-count      number    Current frame displayed
 max        number    Total number of frames to be displayed
+count      number    Current frame displayed
 paused     boolean   Whether currently paused
 loop       boolean   Whether currently set to loop
 loopcount  number    Requested number of loops (rounded)
@@ -122,10 +127,10 @@ loopno     number    Current loop number
 stride     number    Current frame stride
 speedup    number    Frame stride to be used in fast-forward
 cadence    number    Current time in ms between frames
-play()     function  Runs animation
-pause()    function  Pauses/stops animation
-seek(n)    function  Jumps to frame n
-reset()    function  Restores state before calling animation
+play()     function  Run animation
+pause()    function  Pause/stop animation
+seek(n)    function  Jump to frame n
+reset()    function  Restore to state before calling animation
 </code></pre>
 
 <h2>Files</h2>
@@ -134,7 +139,11 @@ reset()    function  Restores state before calling animation
 the <code>icons</code> subdirectory of this distribution, and are linked below;
 note that most are pure white PNGs with variable opacity, intended to
 be viewed on a dark background (such as the <code>back.png</code> image used in
-the control panel).</p>
+the control panel). If you are viewing this documentation as
+<code>README.md</code> on GitHub, the icons below will be nearly invisible
+white-on-white. Cloning the repository and viewing <code>README.html</code> will
+show the icons properly, and also display the demo animations in the
+<strong>Example</strong> section.</p>
 
 <style>
 .buttons img { background: black }
@@ -157,11 +166,6 @@ the control panel).</p>
 <a href="icons/scrollbar.png"><img src=icons/scrollbar.png></a></span>
 <a href="icons/slider.png"><img src=icons/slider.png></a></span></p>
 
-<p>(Note that if you're viewing this file as <code>README.md</code> on GitHub, the
-above icons will be nearly-invisible white-on-white. Cloning the
-repository and viewing <code>README.html</code> will show the icons properly, and
-also display the demo animations in the <strong>Example</strong> section.)</p>
-
 <p>You will likely want to copy these icons to a suitable
 browser-viewable directory. The URL of the icon directory can be
 specified per-animation basis with the <em>params</em><code>.icons</code> parameter. If
@@ -179,24 +183,23 @@ per-animation basis.</p>
 
 <h2>Notes</h2>
 
-<p>The function will set the <code>onmouseover</code> and <code>onmouseout</code> properties of
-the control panel element. These properties are saved and restored if
-the returned object's <code>reset()</code> method is called. Other properties of
-this element are left unchanged. The animation will <em>not</em> inherit the
-size of the container; use the <em>params</em><code>.imclass</code> parameter to apply
-styles to the animation images.</p>
+<p>The function will replace the image element, and set the <code>onmouseover</code>
+and <code>onmouseout</code> properties of the control panel element. These are
+saved and restored if the returned object's <code>reset()</code> method is
+called. Other properties of this element are left unchanged. The
+animation will <em>not</em> inherit the size of the container; use the
+<em>params</em><code>.imclass</code> parameter to apply styles to the animation images.</p>
 
 <p>If <em>srcList</em> contains only a single entry, then <code>animateIMG</code> does not
-perform any animation; it simply loads that image into the frame. In
-this case the returned object contains only a single property, the
-<code>reset()</code> method, which restores the original <code>src</code> property of the
-frame.</p>
+perform any animation; it simply replaces the image with that frame.
+In this case the returned object contains only a single property, the
+<code>reset()</code> method, which restores the original image.</p>
 
 <h2>Example</h2>
 
 <p>The following HTML snippet loads the <code>animateIMG()</code> function, and also
 places the images <code>example/image_1.png</code> through
-<code>example/image_250.png</code> into the <code>imglist</code> array:</p>
+<code>example/image_250.png</code> into the array <code>imglist</code>:</p>
 
 <pre><code>&lt;script src=&quot;animateimg.js&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
@@ -210,57 +213,55 @@ for ( i = 1; i &lt;= 250; i++ )
 
 <script>
 var i, imglist = [];
-for ( i = 1; i <= 250; i++ ) {
-    imglist.push( "example/image_" + i + ".png" );
-}
+for ( i = 1; i <= 250; i++ )
+//    imglist.push( "example/image_" + i + ".png" );
+      imglist.push( "http://www.tapir.caltech.edu/~teviet/AnimateIMG/image_" + i + ".png" );
 </script>
 
-<p>The simplest way to display the default (looping, click-to-pause)
-animation of these images is to place an empty <code>&lt;div&gt;</code> elemend with an
-<code>id</code> attribute at the desired location on the page, and pass the image
-list and ID to <code>animateIMG()</code>:</p>
+<p>The default (looping, click-to-pause) animation simply places these
+images into a specified <code>&lt;img&gt;</code> element, which may or may not already
+have a &quot;preview&quot; image::</p>
 
-<pre><code>&lt;div id=&quot;anim1&quot;&gt;&lt;/div&gt;
+<pre><code>&lt;img id=&quot;im1&quot; src=&quot;example/preview1.png&quot;&gt;
 &lt;script&gt;
-animateIMG( imglist, { frameID: &quot;anim1&quot; } );
+animateIMG( imglist, { imgID: &quot;im1&quot; } );
 &lt;/script&gt;
 </code></pre>
 
-<div id="anim1"></div>
-
+<p><img id="im1" src="example/preview1.png">
 <script>
-animateIMG( imglist, { frameID: "anim1" } );
-</script>
+animateIMG( imglist, { imgID: "im1", loopcount: 2 } );
+</script></p>
 
 <p>To give the animation a full set of controls, specify a positioned
 container with a known or calculable width (e.g. a <code>&lt;div&gt;</code> or <code>&lt;td&gt;</code>
-element , not a <code>&lt;span&gt;</code> element). This may be the same container as
-the one holding the animation itself, in which case the controls will
-appear when you hover over the animation. Be sure to give it a
-non-static <code>position:</code> style; a <code>&lt;div&gt;</code> may also need to be specified
-with <code>display: inline-block;</code> to allow it to resize according to its
+element , not a <code>&lt;span&gt;</code> element). This container may include the
+animation itsel, in which case it is convenient to show the controls
+only when hovering with the mouse. Be sure to give it a non-static
+<code>position:</code> style; a <code>&lt;div&gt;</code> may also need to be specified with
+<code>display: inline-block;</code> to allow it to resize according to its
 contents. E.g.</p>
 
 <pre><code>&lt;div style=&quot;position: relative; display: inline-block;&quot;
-     id=&quot;anim2&quot;&gt;&lt;/div&gt;
+     id=&quot;panel&quot;&gt;&lt;img id=&quot;im2&quot; src=&quot;example/preview2.png&quot;&gt;&lt;/div&gt;
 &lt;script&gt;
-animateIMG( imglist, { frameID: &quot;anim2&quot;, panelID: &quot;anim2&quot;,
-                       icons: &quot;icons&quot; } );
+animateIMG( imglist, { imgID: &quot;im2&quot;, panelID: &quot;panel&quot;,
+                       icons: &quot;icons&quot;, hidden: true } );
 &lt;/script&gt;
 </code></pre>
 
 <div style="position: relative; display: inline-block;"
-     id="anim2"></div>
+     id="panel"><img id="im2" src="example/preview2.png"></div>
 
 <script>
-animateIMG( imglist, { frameID: "anim2", panelID: "anim2",
-                       icons: "icons" } );
+animateIMG( imglist, { imgID: "im2", panelID: "panel",
+                       icons: "icons", hidden: true } );
 </script>
 
 <p>Although they display the same set of images, the two animations run
-in separate <code>&lt;div&gt;</code> frames, and the two calls to <code>animateIMG</code> create
+in separate <code>&lt;img&gt;</code> elements, and the two calls to <code>animateIMG</code> create
 separate instances of the underlying objects. Thus, the animations
-run completely independent of one another.</p>
+run completely independently of one another.</p>
 
 <h2>See Also</h2>
 

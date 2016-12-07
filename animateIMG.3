@@ -10,18 +10,18 @@
 .SH  "DESCRIPTION"
 .PP
 This function takes a sequence of images and produces an animation by
-displaying them in succession within a specified container element
-such as \fB\fC<div>\fR, \fB\fC<span>\fR, or \fB\fC<td>\fR (the "frame")\[char46] The images are
-specified by an array of strings \fIsrcList\fR that will be loaded and
-then displayed in the frame. The \fIparams\fR object is a structure whose
-members control the placement and other properties of the animation.
+displaying them in succession within a specified \fB\fC<img>\fR element. The
+images are specified by an array of strings \fIsrcList\fR that will be
+loaded and then displayed in the frame. The \fIparams\fR object is a
+structure whose members control the placement and other properties of
+the animation.
 .PP
-For instance, if you have assigned the frame an \fB\fCid\fR attribute, then
-you may set \fIparams\fR\fB\fC\[char46]id\fR to that value in order to display the
-animation in that element. Alternatively, if you have the frame
-element object in the HTML Document Object Model, then you can assign
-\fIparams\fR\fB\fC\[char46]frame\fR to that object, which takes precedence over the
-\fIparams\fR\[char46]\fB\fCid\fR field.
+For instance, if you have assigned the \fB\fC<img>\fR element an \fB\fCid\fR
+attribute, then you may set \fIparams\fR\fB\fC\[char46]imgID\fR to that value in order to
+display the animation in that element. Alternatively, if you have the
+frame element object in the HTML Document Object Model, then you can
+assign \fIparams\fR\fB\fC\[char46]img\fR to that object, which takes precedence over the
+\fIparams\fR\[char46]\fB\fCimgID\fR field.
 .PP
 By default, the animation loops indefinitely, but can be paused by
 clicking in the frame. Other \fIparams\fR fields can modify this
@@ -36,18 +36,21 @@ style), and must have a width of more than 124 pixels wide at the time
 the animation starts; otherwise \fB\fCanimateIMG\fR reverts to a plain
 unadorned animation.
 .PP
-The panel and frame elements may be the same element, in which case
-\fB\fCanimateIMG\fR takes the additional step of hiding the panel when the
-mouse is outside of the frame.
+It is common to place the image element within the panel element, so
+that the controls overlay the animation. Setting the \fIparams\fR\fB\fC\[char46]hide\fR
+parameter will cause the controls to display only when you mouse over
+the panel.
 .PP
-Note also that the size of the animation is not controled by the frame
-container. Use the \fIparams\fR\fB\fC\[char46]class\fR parameter to apply dimensions and
-other styles to the animated images.
+The animation will inherit any styling associated with the \fB\fC<img>\fR
+element, such as explicit dimensions. It is also common to initialize
+the \fB\fC<img>\fR tag with a "preview" image to display while the animation
+is loading: that image will be replaced with the animation once all
+animation frames have been loaded.
 .SS  "Parameters: Plain Animation"
 .PP
 The following parameters are used when displaying an animation without
-a control panel. As noted, only \fIsrcList\fR and one of \fIparams\fR\fB\fC\[char46]frame\fR
-or \fIparams\fR\fB\fC\[char46]frameID\fR are required; the rest are optional (with the
+a control panel. As noted, only \fIsrcList\fR and one of \fIparams\fR\fB\fC\[char46]img\fR
+or \fIparams\fR\fB\fC\[char46]imgID\fR are required; the rest are optional (with the
 specified defaults)\[char46]
 
 .RS
@@ -55,9 +58,8 @@ specified defaults)\[char46]
 Parameter         Type     Description
 ----------------------------------------------------------------
 srcList           array    Array of image src strings  
-params.frame      element  element to contain animation 
-params.frameID    string   ID of element to contain animation
-params.imclass    string   CSS class applied to images (none)
+params.img        element  element to contain animation 
+params.imgID      string   ID of element to contain animation
 params.paused     boolean  Whether initially paused (false)
 params.clickable  boolean  Whether clicking frame pauses (true)
 params.cadence    number   Time in ms between frames (40)
@@ -65,10 +67,12 @@ params.loopcount  number   # of times animation will play (0)
 .EE
 .RE
 .PP
-Note that \fIparams\fR\fB\fC\[char46]loopcount=0\fR means the animation will loop
-indefinitely. If \fIparams\fR\fB\fC\[char46]clickable\fR is \fB\fCfalse\fR then
-\fIparams\fR\fB\fC\[char46]paused\fR is ignored, unless the animation has a control panel
-(below)\[char46]
+Note that a non-positive \fIparams\fR\fB\fC\[char46]loopcount=0\fR means the animation
+will loop indefinitely. Once the animation reaches its designated
+loopcount, it will pause; if \fIparams\fR\fB\fC\[char46]clickable\fR is true then
+clicking at the end of a loop sequence will start a new sequence. If
+\fIparams\fR\fB\fC\[char46]clickable\fR is \fB\fCfalse\fR then \fIparams\fR\fB\fC\[char46]paused\fR is ignored,
+unless the animation has a control panel (below)\[char46]
 .SS  "Parameters: Animation With Control Panel"
 .PP
 When a control panel is present, the user can toggle whether the
@@ -86,6 +90,7 @@ params.panel      element  Element to place controls
 params.panelID    string   ID of element to place controls
 parame.icons      string   directory containing button icons (.)
 params.speedup    number   Frame stride in fast-forward (5)
+parame.hidden     boolean  Show panel only when hovering (false)
 .EE
 .RE
 .SS  "Installing"
@@ -114,8 +119,8 @@ has the the following properties:
 .EX
 Property   Type      Description
 ----------------------------------------------------------------
-count      number    Current frame displayed
 max        number    Total number of frames to be displayed
+count      number    Current frame displayed
 paused     boolean   Whether currently paused
 loop       boolean   Whether currently set to loop
 loopcount  number    Requested number of loops (rounded)
@@ -123,10 +128,10 @@ loopno     number    Current loop number
 stride     number    Current frame stride
 speedup    number    Frame stride to be used in fast-forward
 cadence    number    Current time in ms between frames
-play()     function  Runs animation
-pause()    function  Pauses/stops animation
-seek(n)    function  Jumps to frame n
-reset()    function  Restores state before calling animation
+play()     function  Run animation
+pause()    function  Pause/stop animation
+seek(n)    function  Jump to frame n
+reset()    function  Restore to state before calling animation
 .EE
 .RE
 .SH  "FILES"
@@ -135,7 +140,11 @@ The default buttons and other icons for the control panel are given in
 the \fB\fCicons\fR subdirectory of this distribution, and are linked below;
 note that most are pure white PNGs with variable opacity, intended to
 be viewed on a dark background (such as the \fB\fCback.png\fR image used in
-the control panel)\[char46]
+the control panel)\[char46] If you are viewing this documentation as
+\fB\fCREADME.md\fR on GitHub, the icons below will be nearly invisible
+white-on-white. Cloning the repository and viewing \fB\fCREADME.html\fR will
+show the icons properly, and also display the demo animations in the
+\fBExample\fR section.
 .PP
 
  (icons/home.png)
@@ -152,11 +161,6 @@ the control panel)\[char46]
  (icons/bar.png)
  (icons/scrollbar.png)
  (icons/slider.png)
-.PP
-(Note that if you're viewing this file as \fB\fCREADME.md\fR on GitHub, the
-above icons will be nearly-invisible white-on-white. Cloning the
-repository and viewing \fB\fCREADME.html\fR will show the icons properly, and
-also display the demo animations in the \fBExample\fR section.)
 .PP
 You will likely want to copy these icons to a suitable
 browser-viewable directory. The URL of the icon directory can be
@@ -177,28 +181,27 @@ also create your own icons, either globally or on a per-page or
 per-animation basis.
 .SH  "NOTES"
 .PP
-The function will set the \fB\fConmouseover\fR and \fB\fConmouseout\fR properties of
-the control panel element. These properties are saved and restored if
-the returned object's 
+The function will replace the image element, and set the \fB\fConmouseover\fR
+and \fB\fConmouseout\fR properties of the control panel element. These are
+saved and restored if the returned object's 
 .BR \fB\fCreset ()\fR
-method is called. Other properties of
-this element are left unchanged. The animation will \fInot\fR inherit the
-size of the container; use the \fIparams\fR\fB\fC\[char46]imclass\fR parameter to apply
-styles to the animation images.
+method is
+called. Other properties of this element are left unchanged. The
+animation will \fInot\fR inherit the size of the container; use the
+\fIparams\fR\fB\fC\[char46]imclass\fR parameter to apply styles to the animation images.
 .PP
 If \fIsrcList\fR contains only a single entry, then \fB\fCanimateIMG\fR does not
-perform any animation; it simply loads that image into the frame. In
-this case the returned object contains only a single property, the
+perform any animation; it simply replaces the image with that frame.
+In this case the returned object contains only a single property, the
 .BR \fB\fCreset ()\fR
-method, which restores the original \fB\fCsrc\fR property of the
-frame.
+method, which restores the original image.
 .SH  "EXAMPLE"
 .PP
 The following HTML snippet loads the 
 .BR \fB\fCanimateIMG ()\fR
 function, and also
 places the images \fB\fCexample/image_1.png\fR through
-\fB\fCexample/image_250.png\fR into the \fB\fCimglist\fR array:
+\fB\fCexample/image_250.png\fR into the array \fB\fCimglist\fR:
 
 .RS
 .EX
@@ -211,45 +214,46 @@ for ( i = 1; i <= 250; i++ )
 .EE
 .RE
 .PP
-The simplest way to display the default (looping, click-to-pause)
-animation of these images is to place an empty \fB\fC<div>\fR elemend with an
-\fB\fCid\fR attribute at the desired location on the page, and pass the image
-list and ID to 
-.BR \fB\fCanimateIMG ()\fR:
+The default (looping, click-to-pause) animation simply places these
+images into a specified \fB\fC<img>\fR element, which may or may not already
+have a "preview" image::
 
 .RS
 .EX
-<div id="anim1"></div>
+<img id="im1" src="example/preview1.png">
 <script>
-animateIMG( imglist, { frameID: "anim1" } );
+animateIMG( imglist, { imgID: "im1" } );
 </script>
 .EE
 .RE
 .PP
+
+
+.PP
 To give the animation a full set of controls, specify a positioned
 container with a known or calculable width (e.g. a \fB\fC<div>\fR or \fB\fC<td>\fR
-element , not a \fB\fC<span>\fR element)\[char46] This may be the same container as
-the one holding the animation itself, in which case the controls will
-appear when you hover over the animation. Be sure to give it a
-non-static \fB\fCposition:\fR style; a \fB\fC<div>\fR may also need to be specified
-with \fB\fCdisplay: inline-block;\fR to allow it to resize according to its
+element , not a \fB\fC<span>\fR element)\[char46] This container may include the
+animation itsel, in which case it is convenient to show the controls
+only when hovering with the mouse. Be sure to give it a non-static
+\fB\fCposition:\fR style; a \fB\fC<div>\fR may also need to be specified with
+\fB\fCdisplay: inline-block;\fR to allow it to resize according to its
 contents. E.g.
 
 .RS
 .EX
 <div style="position: relative; display: inline-block;"
-     id="anim2"></div>
+     id="panel"><img id="im2" src="example/preview2.png"></div>
 <script>
-animateIMG( imglist, { frameID: "anim2", panelID: "anim2",
-                       icons: "icons" } );
+animateIMG( imglist, { imgID: "im2", panelID: "panel",
+                       icons: "icons", hidden: true } );
 </script>
 .EE
 .RE
 .PP
 Although they display the same set of images, the two animations run
-in separate \fB\fC<div>\fR frames, and the two calls to \fB\fCanimateIMG\fR create
+in separate \fB\fC<img>\fR elements, and the two calls to \fB\fCanimateIMG\fR create
 separate instances of the underlying objects. Thus, the animations
-run completely independent of one another.
+run completely independently of one another.
 .SH  "SEE ALSO"
 .PP
 W3Schools (http://www.w3schools.com)

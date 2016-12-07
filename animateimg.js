@@ -40,18 +40,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## Description
 
 This function takes a sequence of images and produces an animation by
-displaying them in succession within a specified container element
-such as `<div>`, `<span>`, or `<td>` (the "frame").  The images are
-specified by an array of strings _srcList_ that will be loaded and
-then displayed in the frame.  The _params_ object is a structure whose
-members control the placement and other properties of the animation.
+displaying them in succession within a specified `<img>` element.  The
+images are specified by an array of strings _srcList_ that will be
+loaded and then displayed in the frame.  The _params_ object is a
+structure whose members control the placement and other properties of
+the animation.
 
-For instance, if you have assigned the frame an `id` attribute, then
-you may set _params_`.id` to that value in order to display the
-animation in that element.  Alternatively, if you have the frame
-element object in the HTML Document Object Model, then you can assign
-_params_`.frame` to that object, which takes precedence over the
-_params_.`id` field.
+For instance, if you have assigned the `<img>` element an `id`
+attribute, then you may set _params_`.imgID` to that value in order to
+display the animation in that element.  Alternatively, if you have the
+frame element object in the HTML Document Object Model, then you can
+assign _params_`.img` to that object, which takes precedence over the
+_params_.`imgID` field.
 
 By default, the animation loops indefinitely, but can be paused by
 clicking in the frame.  Other _params_ fields can modify this
@@ -66,36 +66,40 @@ style), and must have a width of more than 124 pixels wide at the time
 the animation starts; otherwise `animateIMG` reverts to a plain
 unadorned animation.
 
-The panel and frame elements may be the same element, in which case
-`animateIMG` takes the additional step of hiding the panel when the
-mouse is outside of the frame.
+It is common to place the image element within the panel element, so
+that the controls overlay the animation.  Setting the _params_`.hide`
+parameter will cause the controls to display only when you mouse over
+the panel.
 
-Note also that the size of the animation is not controled by the frame
-container.  Use the _params_`.class` parameter to apply dimensions and
-other styles to the animated images.
+The animation will inherit any styling associated with the `<img>`
+element, such as explicit dimensions.  It is also common to initialize
+the `<img>` tag with a "preview" image to display while the animation
+is loading: that image will be replaced with the animation once all
+animation frames have been loaded.
 
 ### Parameters: Plain Animation
 
 The following parameters are used when displaying an animation without
-a control panel.  As noted, only _srcList_ and one of _params_`.frame`
-or _params_`.frameID` are required; the rest are optional (with the
+a control panel.  As noted, only _srcList_ and one of _params_`.img`
+or _params_`.imgID` are required; the rest are optional (with the
 specified defaults).
 
     Parameter         Type     Description
     ----------------------------------------------------------------
     srcList           array    Array of image src strings  
-    params.frame      element  element to contain animation 
-    params.frameID    string   ID of element to contain animation
-    params.imclass    string   CSS class applied to images (none)
+    params.img        element  element to contain animation 
+    params.imgID      string   ID of element to contain animation
     params.paused     boolean  Whether initially paused (false)
     params.clickable  boolean  Whether clicking frame pauses (true)
     params.cadence    number   Time in ms between frames (40)
     params.loopcount  number   # of times animation will play (0)
 
-Note that _params_`.loopcount=0` means the animation will loop
-indefinitely.  If _params_`.clickable` is `false` then
-_params_`.paused` is ignored, unless the animation has a control panel
-(below).
+Note that a non-positive _params_`.loopcount=0` means the animation
+will loop indefinitely.  Once the animation reaches its designated
+loopcount, it will pause; if _params_`.clickable` is true then
+clicking at the end of a loop sequence will start a new sequence.  If
+_params_`.clickable` is `false` then _params_`.paused` is ignored,
+unless the animation has a control panel (below).
 
 ### Parameters: Animation With Control Panel
 
@@ -112,6 +116,7 @@ _params_`.container` or _params_`.containerID` is required.
     params.panelID    string   ID of element to place controls
     parame.icons      string   directory containing button icons (.)
     params.speedup    number   Frame stride in fast-forward (5)
+    parame.hidden     boolean  Show panel only when hovering (false)
 
 ### Installing
 
@@ -138,8 +143,8 @@ has the the following properties:
 
     Property   Type      Description
     ----------------------------------------------------------------
-    count      number    Current frame displayed
     max        number    Total number of frames to be displayed
+    count      number    Current frame displayed
     paused     boolean   Whether currently paused
     loop       boolean   Whether currently set to loop
     loopcount  number    Requested number of loops (rounded)
@@ -147,10 +152,10 @@ has the the following properties:
     stride     number    Current frame stride
     speedup    number    Frame stride to be used in fast-forward
     cadence    number    Current time in ms between frames
-    play()     function  Runs animation
-    pause()    function  Pauses/stops animation
-    seek(n)    function  Jumps to frame n
-    reset()    function  Restores state before calling animation
+    play()     function  Run animation
+    pause()    function  Pause/stop animation
+    seek(n)    function  Jump to frame n
+    reset()    function  Restore to state before calling animation
 
 ## Files
 
@@ -158,7 +163,11 @@ The default buttons and other icons for the control panel are given in
 the `icons` subdirectory of this distribution, and are linked below;
 note that most are pure white PNGs with variable opacity, intended to
 be viewed on a dark background (such as the `back.png` image used in
-the control panel).
+the control panel).  If you are viewing this documentation as
+`README.md` on GitHub, the icons below will be nearly invisible
+white-on-white.  Cloning the repository and viewing `README.html` will
+show the icons properly, and also display the demo animations in the
+**Example** section.
 
 <style>
 .buttons img { background: black }
@@ -180,11 +189,6 @@ the control panel).
 [<img src=icons/scrollbar.png>](icons/scrollbar.png)</span>
 [<img src=icons/slider.png>](icons/slider.png)</span>
 
-(Note that if you're viewing this file as `README.md` on GitHub, the
-above icons will be nearly-invisible white-on-white.  Cloning the
-repository and viewing `README.html` will show the icons properly, and
-also display the demo animations in the **Example** section.)
-
 You will likely want to copy these icons to a suitable
 browser-viewable directory.  The URL of the icon directory can be
 specified per-animation basis with the _params_`.icons` parameter.  If
@@ -194,6 +198,9 @@ global variable declared in `animateimg.js`:
     var animateimg_default_icons = "";
 </MARKDOWN> */
 
+/***********************************************************************
+Default icon directory (absolute or relative URL)
+***********************************************************************/
 var animateimg_default_icons = "";
 
 /*
@@ -207,24 +214,23 @@ per-animation basis.
 
 ## Notes
 
-The function will set the `onmouseover` and `onmouseout` properties of
-the control panel element.  These properties are saved and restored if
-the returned object's `reset()` method is called.  Other properties of
-this element are left unchanged.  The animation will *not* inherit the
-size of the container; use the _params_`.imclass` parameter to apply
-styles to the animation images.
+The function will replace the image element, and set the `onmouseover`
+and `onmouseout` properties of the control panel element.  These are
+saved and restored if the returned object's `reset()` method is
+called.  Other properties of this element are left unchanged.  The
+animation will *not* inherit the size of the container; use the
+_params_`.imclass` parameter to apply styles to the animation images.
 
 If _srcList_ contains only a single entry, then `animateIMG` does not
-perform any animation; it simply loads that image into the frame.  In
-this case the returned object contains only a single property, the
-`reset()` method, which restores the original `src` property of the
-frame.
+perform any animation; it simply replaces the image with that frame.
+In this case the returned object contains only a single property, the
+`reset()` method, which restores the original image.
 
 ## Example
 
 The following HTML snippet loads the `animateIMG()` function, and also
 places the images `example/image_1.png` through
-`example/image_250.png` into the `imglist` array:
+`example/image_250.png` into the array `imglist`:
 
     <script src="animateimg.js"></script>
     <script>
@@ -236,79 +242,80 @@ places the images `example/image_1.png` through
 <script src="animateimg.js"></script>
 <script>
 var i, imglist = [];
-for ( i = 1; i <= 250; i++ ) {
-    imglist.push( "example/image_" + i + ".png" );
-}
+for ( i = 1; i <= 250; i++ )
+//    imglist.push( "example/image_" + i + ".png" );
+      imglist.push( "http://www.tapir.caltech.edu/~teviet/AnimateIMG/image_" + i + ".png" );
 </script>
 
-The simplest way to display the default (looping, click-to-pause)
-animation of these images is to place an empty `<div>` elemend with an
-`id` attribute at the desired location on the page, and pass the image
-list and ID to `animateIMG()`:
+The default (looping, click-to-pause) animation simply places these
+images into a specified `<img>` element, which may or may not already
+have a "preview" image::
 
-    <div id="anim1"></div>
+    <img id="im1" src="example/preview1.png">
     <script>
-    animateIMG( imglist, { frameID: "anim1" } );
+    animateIMG( imglist, { imgID: "im1" } );
     </script>
 
-<div id="anim1"></div>
+<img id="im1" src="example/preview1.png">
 <script>
-animateIMG( imglist, { frameID: "anim1" } );
+animateIMG( imglist, { imgID: "im1", loopcount: 2 } );
 </script>
 
 To give the animation a full set of controls, specify a positioned
 container with a known or calculable width (e.g. a `<div>` or `<td>`
-element , not a `<span>` element).  This may be the same container as
-the one holding the animation itself, in which case the controls will
-appear when you hover over the animation.  Be sure to give it a
-non-static `position:` style; a `<div>` may also need to be specified
-with `display: inline-block;` to allow it to resize according to its
+element , not a `<span>` element).  This container may include the
+animation itsel, in which case it is convenient to show the controls
+only when hovering with the mouse.  Be sure to give it a non-static
+`position:` style; a `<div>` may also need to be specified with
+`display: inline-block;` to allow it to resize according to its
 contents.  E.g.
 
     <div style="position: relative; display: inline-block;"
-         id="anim2"></div>
+         id="panel"><img id="im2" src="example/preview2.png"></div>
     <script>
-    animateIMG( imglist, { frameID: "anim2", panelID: "anim2",
-                           icons: "icons" } );
+    animateIMG( imglist, { imgID: "im2", panelID: "panel",
+                           icons: "icons", hidden: true } );
     </script>
 
 <div style="position: relative; display: inline-block;"
-     id="anim2"></div>
+     id="panel"><img id="im2" src="example/preview2.png"></div>
 <script>
-animateIMG( imglist, { frameID: "anim2", panelID: "anim2",
-                       icons: "icons" } );
+animateIMG( imglist, { imgID: "im2", panelID: "panel",
+                       icons: "icons", hidden: true } );
 </script>
 
 Although they display the same set of images, the two animations run
-in separate `<div>` frames, and the two calls to `animateIMG` create
+in separate `<img>` elements, and the two calls to `animateIMG` create
 separate instances of the underlying objects.  Thus, the animations
-run completely independent of one another.
+run completely independently of one another.
 
 ## See Also
 
 [W3Schools](http://www.w3schools.com)
 
 </MARKDOWN> */
+
+/***********************************************************************
+Full animation function
+***********************************************************************/
 function animateIMG( srcList, params ) {
     /* Define "global" variables within this context. */
     var i;                      // generic index
     var myInterval = undefined; // ID returned by setInterval()
     var scrolling = false;      // whether animation is being scrolled
     var scrollcount = 0;        // frame being scrolled to
-    var thisImage = undefined;  // frame image object
-    var thatImage = undefined;  // frame image object
+    var curimg = undefined;     // current image object
     var images = [];            // list of image objects
-    var imwidth = 0;            // (maximum) width of images
-    var imheight = 0;           // (maximum) height of images
     var sliderstep;             // amount scrolling slider moves per frame
+    var clicked = 0;            // whether image is being clicked
 
     /* Define some variables derived from params elements. */
     var clickable = ( typeof params.clickable === "boolean" ) ?
 	params.clickable : true;
+    var hidden = ( typeof params.hidden === "boolean" ) ?
+	params.hidden : false;
     var dir = ( typeof params.icons === "string" ) ?
 	params.icons + "/" : animateimg_default_icons;
-    var imclass = ( typeof params.imclass === "string" ) ?
-	params.imclass : undefined;
 
     /* Define hooks into the animation that will get passed back to
        the calling context. */
@@ -328,9 +335,12 @@ function animateIMG( srcList, params ) {
     ret.speedup = ( ret.speedup > 0 ) ? ret.speedup : 5;
 
     /* Get frame element.  Return if not found. */
-    var frame = ( params.frame && params.frame.nodeType == 1 ) ?
-	params.frame : document.getElementById( params.frameID );
-    if ( !frame )
+    var saveimg = ( params.img && params.img.nodeName == "IMG" ) ?
+	params.img : document.getElementById( params.imgID );
+    if ( !saveimg )
+	return;
+    var parent = saveimg.parentNode;
+    if ( !parent )
 	return;
 
     /* Non-animation: if there are no images, return undefined.  If
@@ -339,10 +349,14 @@ function animateIMG( srcList, params ) {
     if ( ret.max < 1 )
 	return;
     if ( ret.max == 1 ) {
-	thisImage = document.createElement( "IMG" );
-	thisImage.src = srcList[0];
-	frame.appendChild( thisImage );
-	return { reset: function(){ frame.removeChild( thisImage ); } };
+	curimg = saveimg.cloneNode( false );
+	curimg.src = srcList[0];
+	parent.replaceChild( curimg, saveimg );
+	return {
+	    reset: function(){
+		parent.replaceChild( saveimg, curimg );
+	    }
+	};
     }
     
     /* Get control panel element.  If it's not found or is
@@ -358,38 +372,23 @@ function animateIMG( srcList, params ) {
     var saveonmouseout = panel.onmouseout;
     var panelWidth = panel.offsetWidth;
 
-    /* Set up a subframe for holding the image elements of the
-       animation.  This lets us append and remove images without
-       affecting other subelements of the passed frame.  In
-       particular, if the frame and the panel are the same element, we
-       can place the controls in front of the subframe, and swapping
-       images into and out of the subframe won't change its position
-       behind the controls. */
-    var subframe = document.createElement( "DIV" );
-    frame.appendChild( subframe );
-
     /* Set up box for controls, and place zero-length progress bar in
        it.  The progress bar will be lengthened incrementally by the
        imageLoaded() callback function, as each image is loaded.  (We
-       need a box within the panel element, because, if the panel and
-       frame elements are the same, we want to be able to toggle the
-       visibility of the controls.) */
+       need a box within the panel element, because we may want to
+       toggle its visibility independent of other contents.) */
     var controls = document.createElement( "DIV" );
     var back = document.createElement( "IMG" );
-    back.src = dir + "back.png";
-    back.style.position = "absolute";
-    back.style.bottom = "0px";
-    back.style.left = "0px";
-    back.style.height = "20px";
-    back.style.width = panelWidth + "px";
-    controls.appendChild( back );
     var bar = document.createElement( "IMG" );
+    back.src = dir + "back.png";
     bar.src = dir + "bar.png";
-    bar.style.position = "absolute";
-    bar.style.bottom = "0px";
-    bar.style.left = "0px";
-    bar.style.height = "20px";
+    back.style.position = bar.style.position = "absolute";
+    back.style.bottom = bar.style.bottom = "0px";
+    back.style.left = bar.style.left = "0px";
+    back.style.height = bar.style.height = "20px";
+    back.style.width = panelWidth + "px";
     bar.style.width = "0px";
+    controls.appendChild( back );
     controls.appendChild( bar );
     panel.appendChild( controls );
 
@@ -419,13 +418,31 @@ function animateIMG( srcList, params ) {
     /* Start loading images.  The imageLoaded() callback will handle
        starting the animation once everything is loaded. */
     for ( i = 0; i < ret.max; i++ ) {
-	thisImage = document.createElement( "IMG" );
-	thisImage.onload = imageLoaded;
-	thisImage.onerror = imageLoaded;
-	thisImage.src = srcList[i];
-	if ( imclass )
-	    thisImage.className = imclass;
-	images.push( thisImage );
+	curimg = saveimg.cloneNode( false );
+	curimg.onload = imageLoaded;
+	curimg.onerror = imageLoaded;
+	/* Clicking on the animation may well produce a mousedown and
+	   mouseup event in different image frames, and neither frame
+	   (nor their parent) will register this as a "click".  So we
+	   have to use the click variable to keep track of the
+	   separate mouse events. */
+	if ( clickable ) {
+	    curimg.onmousedown = function( event ) {
+		if ( event.which == 1 )
+		    click = 1;
+	    };
+	    curimg.onmouseup = function( event ) {
+		if ( event.which == 1 && click ) {
+		    if ( ret.paused ) { play(); } else { pause(); }
+		    click = 0;
+		}
+	    };
+	    curimg.onmouseout = function() {
+		click = 0;
+	    };
+	}
+	curimg.src = srcList[i];
+	images.push( curimg );
     }
 
     /* At this point animation is set up; running it is handled in the
@@ -439,7 +456,7 @@ function animateIMG( srcList, params ) {
 	if ( myInterval ) {
 	    clearInterval( myInterval );
 	}
-	frame.removeChild( subframe );
+	parent.replaceChild( saveimg, curimg );
 	panel.removeChild( controls );
 	panel.onmouseover = saveonmouseover;
 	panel.onmouseout = saveonmouseout;
@@ -452,55 +469,29 @@ function animateIMG( srcList, params ) {
        image is loaded.  When the final image is loaded, it replaces
        the progress bar with the control buttons, and starts the
        animation. */
-    function imageLoaded( event ) {
-	/* count keeps track of number of images loaded.  After all
-	   images have been loaded, it will be retasked to keep track
-	   of current playback frame, */
+    function imageLoaded() {
+	/* Note that ret.count keeps track of number of images loaded.
+	   After all images have been loaded, it will be retasked to
+	   keep track of current playback frame, */
 	ret.count++;
-	/* To avoid animation jitter with differently-sized images,
-	   the subframe is explicitly sized to the maximum dimensions
-	   of the loaded images.  This also allows the frame to be
-	   given a size while images are still loading. */
-	if ( event.target.width > imwidth ) {
-	    imwidth = event.target.width;
-	    subframe.style.width = imwidth + "px";
-	}
-	if ( event.target.height > imheight ) {
-	    imheight = event.target.height;
-	    subframe.style.height = imheight + "px";
-	}
-	/* Control panel may resize as images load; e.g. due to frame
-	   resizing above (if panel is within the frame or otherwise
-	   affected by the frame position). */
 	panelWidth = panel.offsetWidth;
 	back.style.width = panelWidth + "px";
+	bar.style.width = panelWidth*ret.count/ret.max + "px";
 
-	/* If images are still loading, we adjust progress bar as each
-	   image loads. */
-	if ( ret.count < ret.max ) {
-	    bar.style.width = panelWidth*ret.count/ret.max + "px";
-	    //if ( ret.count % 50 == 0 )
-	    //alert( "Images loaded: " + ret.count );
-	}
-
-	/* Otherwise, if all images are loaded, we complete the
-	   animation setup (change the control panel from progress bar
-	   to buttons and slider, set up all the mouse events), and
-	   start animation. */
-	else {
-
-	    /* Set click-to-pause within image frame. */
-	    if ( clickable ) {
-		subframe.onclick = function() {
-		    if ( ret.paused ) { play(); } else { pause(); }
-		};
-	    }
+	/* If all images are loaded, we complete the animation setup
+	   (change the control panel from progress bar to buttons and
+	   slider, set up all the mouse events), and start
+	   animation. */
+	if ( ret.count >= ret.max ) {
+	    /* Set initial image. */
+	    parent.replaceChild( images[0], saveimg );
+	    curimg = images[0];
 
 	    /* Clear progress bar from panel.  Also, if panel is the
 	       same as the frame, make it visible only when you mouse
 	       over it. */
 	    controls.removeChild( bar );
-	    if ( panel == frame ) {
+	    if ( hidden ) {
 		controls.style.visibility = "hidden";
 		panel.onmouseover = function() {
 		    controls.style.visibility = "visible";
@@ -513,6 +504,7 @@ function animateIMG( srcList, params ) {
 	    /* Set up control panel, assuming it's large enough to
 	       hold all its buttons (plus at least 4 pixels for the
 	       slider). */
+	    panelWidth = panel.offsetWidth;
 	    if ( panelWidth > 124 ) {
 		sliderstep = ( panelWidth - 124 )/( ret.max - 1 );
 		back.style.width = panelWidth + "px";
@@ -601,7 +593,6 @@ function animateIMG( srcList, params ) {
 
 	    /* Start animation.  The count now keeps track of the
 	       current frame. */
-	    subframe.appendChild( images[0] );
 	    ret.count = 0;
 	    play();
 	}
@@ -673,11 +664,9 @@ function animateIMG( srcList, params ) {
 		ret.count = 0;
 	}
 	/* Update frame and slider as needed. */
-	thisImage = images[ret.count];
-	thatImage = subframe.childNodes[0];
-	if ( thisImage != thatImage ) {
-	    subframe.appendChild( thisImage );
-	    subframe.removeChild( thatImage );
+	if ( curimg != images[ret.count] ) {
+	    parent.replaceChild( images[ret.count], curimg );
+	    curimg = images[ret.count];
 	}
 	slider.style.left = ( 60 + sliderstep*ret.count ) + "px";
     }
@@ -744,25 +733,20 @@ function animateIMG( srcList, params ) {
     }
 }
 
-/* Simple animation function without all the overhead of managing a
-   control panel.  In place of a loop/noloop button it has an optional
-   loopcount limit, after which it stops (though if it's clickable,
-   clicking will start another set of loops). */
+/***********************************************************************
+Unadorned animation function (without controls)
+***********************************************************************/
 function animateIMGplain( srcList, params ) {
     /* Define "global" variables within this context. */
     var i;                      // generic index
     var myInterval = undefined; // ID returned by setInterval()
-    var thisImage = undefined;  // frame image object
-    var thatImage = undefined;  // frame image object
+    var curimg = undefined;     // current image object
     var images = [];            // list of image objects
-    var imwidth = 0;            // (maximum) width of images
-    var imheight = 0;           // (maximum) height of images
+    var clicked = 0;            // whether image is being clicked
 
     /* Define some variables derived from params elements. */
     var clickable = ( typeof params.clickable === "boolean" ) ?
 	params.clickable : true;
-    var imclass = ( typeof params.imclass === "string" ) ?
-	params.imclass : undefined;
 
     /* Define hooks into the animation that will get passed back to
        the calling context. */
@@ -780,9 +764,12 @@ function animateIMGplain( srcList, params ) {
     ret.cadence = ( ret.cadence > 0 ) ? ret.cadence : 40;
 
     /* Get frame element.  Return if not found. */
-    var frame = ( params.frame && params.frame.nodeType == 1 ) ?
-	params.frame : document.getElementById( params.frameID );
-    if ( !frame )
+    var saveimg = ( params.img && params.img.nodeName == "IMG" ) ?
+	params.img : document.getElementById( params.imgID );
+    if ( !saveimg )
+	return;
+    var parent = saveimg.parentNode;
+    if ( !parent )
 	return;
 
     /* Non-animation: if there are no images, return undefined.  If
@@ -791,28 +778,44 @@ function animateIMGplain( srcList, params ) {
     if ( ret.max < 1 )
 	return;
     if ( ret.max == 1 ) {
-	thisImage = document.createElement( "IMG" );
-	thisImage.src = srcList[0];
-	frame.appendChild( thisImage );
-	return { reset: function(){ frame.removeChild( thisImage ); } };
+	curimg = saveimg.cloneNode( false );
+	curimg.src = srcList[0];
+	parent.replaceChild( curimg, saveimg );
+	return {
+	    reset: function(){
+		parent.replaceChild( saveimg, curimg );
+	    }
+	};
     }
-
-    /* Set up a subframe for holding the image elements of the
-       animation.  This lets us append and remove images without
-       affecting other subelements of the passed frame. */
-    var subframe = document.createElement( "DIV" );
-    frame.appendChild( subframe );
 
     /* Start loading images.  The imageLoaded() callback will handle
        starting the animation once everything is loaded. */
     for ( i = 0; i < ret.max; i++ ) {
-	var thisImage = document.createElement( "IMG" );
-	thisImage.addEventListener( "load", imageLoaded );
-	thisImage.addEventListener( "error", imageLoaded );
-	thisImage.src = srcList[i];
-	if ( imclass )
-	    thisImage.className = imclass;
-	images.push( thisImage );
+	curimg = saveimg.cloneNode( false );
+	curimg.onload = imageLoaded;
+	curimg.onerror = imageLoaded;
+	/* Clicking on the animation may well produce a mousedown and
+	   mouseup event in different image frames, and neither frame
+	   (nor their parent) will register this as a "click".  So we
+	   have to use the click variable to keep track of the
+	   separate mouse events. */
+	if ( clickable ) {
+	    curimg.onmousedown = function( event ) {
+		if ( event.which == 1 )
+		    click = 1;
+	    };
+	    curimg.onmouseup = function( event ) {
+		if ( event.which == 1 && click ) {
+		    if ( ret.paused ) { play(); } else { pause(); }
+		    click = 0;
+		}
+	    };
+	    curimg.onmouseout = function() {
+		click = 0;
+	    };
+	}
+	curimg.src = srcList[i];
+	images.push( curimg );
     }
 
     /* At this point animation is set up; running it is handled in the
@@ -826,42 +829,21 @@ function animateIMGplain( srcList, params ) {
 	if ( myInterval ) {
 	    clearInterval( myInterval );
 	}
-	frame.removeChild( subframe );
+	parent.replaceChild( saveimg, curimg );
     }
     return ret;
 
     /* Now define the various methods. */
 
-    /* The imageLoaded() callback lengthens the progress bar as each
-       image is loaded.  When the final image is loaded, it replaces
-       the progress bar with the control buttons, and starts the
-       animation. */
-    function imageLoaded( event ) {
-	/* count keeps track of number of images loaded.  After all
-	   images have been loaded, it will be retasked to keep track
-	   of current playback frame, */
+    /* The imageLoaded() callback starts animation only after all
+       images have been loaded.  Note that ret.count keeps track of
+       number of images loaded.  After all images have been loaded, it
+       will be retasked to keep track of current playback frame, */
+    function imageLoaded() {
 	ret.count++;
-	/* To avoid animation jitter with differently-sized images,
-	   the subframe is explicitly sized to the maximum dimensions
-	   of the loaded images.  This also allows the frame to be
-	   given a size while images are still loading. */
-	if ( event.target.width > imwidth ) {
-	    imwidth = event.target.width;
-	    subframe.style.width = imwidth + "px";
-	}
-	if ( event.target.height > imheight ) {
-	    imheight = event.target.height;
-	    subframe.style.height = imheight + "px";
-	}
-	/* If all images are loaded, set up mouse events and run
-	   animation. */
 	if ( ret.count >= ret.max ) {
-	    if ( clickable ) {
-		subframe.onclick = function() {
-		    if ( ret.paused ) { play(); } else { pause(); }
-		};
-	    }
-	    subframe.appendChild( images[0] );
+	    parent.replaceChild( images[0], saveimg );
+	    curimg = images[0];
 	    ret.count = 0;
 	    play();
 	}
@@ -869,8 +851,8 @@ function animateIMGplain( srcList, params ) {
 
     /* This function runs the animation.  It is called every cadence
        ms (default 40ms, or 25 times per second) while animation is
-       playing.  All it does is check for a "paused" or "scrolling"
-       state change, otherwise advances the frame. */
+       playing.  All it does is check for a "paused" state change,
+       otherwise advances the frame. */
     function whilePlaying() {
 	if ( ret.paused ) {
 	    clearInterval( myInterval );
@@ -881,8 +863,8 @@ function animateIMGplain( srcList, params ) {
     }
 
     /* This is the function used to display the animation frames.  It
-       displays the specified frame, updating the frame counter and
-       scrolling slider as well. */
+       displays the specified frame, updating the frame counter as
+       well. */
     function seek( frameno ) {
 	ret.count = frameno;
 	/* Check whether we've reached maximum loops. */
@@ -899,19 +881,16 @@ function animateIMGplain( srcList, params ) {
 	    ret.loopno = -1;
 	    pause();
 	}
-	/* Update frame and slider as needed. */
-	thisImage = images[ret.count];
-	thatImage = subframe.childNodes[0];
-	if ( thisImage != thatImage ) {
-	    subframe.appendChild( thisImage );
-	    subframe.removeChild( thatImage );
+	/* Update frame as needed. */
+	if ( curimg != images[ret.count] ) {
+	    parent.replaceChild( images[ret.count], curimg );
+	    curimg = images[ret.count];
 	}
     }
 
     /* This function is called when the play button is clicked.  It
-       sets the paused state variable to false, sets the role of
-       various control buttons, and runs the animation by calling
-       whilePlaying() every cadence ms. */
+       sets the paused state variable to false, and runs the animation
+       by calling whilePlaying() every cadence ms. */
     function play() {
 	ret.paused = false;
 	if ( myInterval == undefined ) {
@@ -921,8 +900,7 @@ function animateIMGplain( srcList, params ) {
 
     /* This function is called when the pause button is clicked.  It
        changes the paused state variable to true, which will cause
-       whilePlaying() to stop cycling.  It also changes the role of
-       various control buttons. */
+       whilePlaying() to stop cycling. */
     function pause() {
 	ret.paused = true;
     }
