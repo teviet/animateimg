@@ -94,8 +94,8 @@ specified defaults).
     params.cadence    number   Time in ms between frames (40)
     params.loopcount  number   # of times animation will play (0)
 
-Note that a non-positive _params_`.loopcount=0` means the animation
-will loop indefinitely.  Once the animation reaches its designated
+Note that a non-positive _params_`.loopcount` means the animation will
+loop indefinitely.  Once the animation reaches its designated
 loopcount, it will pause; if _params_`.clickable` is true then
 clicking at the end of a loop sequence will start a new sequence.  If
 _params_`.clickable` is `false` then _params_`.paused` is ignored,
@@ -210,16 +210,17 @@ You may edit this as necessary for your own installation.  A value of
 "" means that `animateIMG` will look for icons in the same directory
 as the page being viewed; relative URLs are also possible.  You may
 also create your own icons, either globally or on a per-page or
-per-animation basis.
+per-animation basis.  Note that in the current implementation all
+"button" icons will be scaled to 20x20 pixels, while the "bar" icons
+will appear 20px high and stretched to fit the horizontal width of the
+panel.
 
 ## Notes
 
 The function will replace the image element, and set the `onmouseover`
 and `onmouseout` properties of the control panel element.  These are
-saved and restored if the returned object's `reset()` method is
-called.  Other properties of this element are left unchanged.  The
-animation will *not* inherit the size of the container; use the
-_params_`.imclass` parameter to apply styles to the animation images.
+saved, and can be restored by calling the returned object's `reset()`
+method.  Other properties of this element are left unchanged.
 
 If _srcList_ contains only a single entry, then `animateIMG` does not
 perform any animation; it simply replaces the image with that frame.
@@ -427,10 +428,12 @@ function animateIMG( srcList, params ) {
 	   separate mouse events. */
 	if ( clickable ) {
 	    curimg.onmousedown = function( event ) {
+		event = event || window.event;
 		if ( event.which == 1 )
 		    click = 1;
 	    };
 	    curimg.onmouseup = function( event ) {
+		event = event || window.event;
 		if ( event.which == 1 && click ) {
 		    if ( ret.paused ) { play(); } else { pause(); }
 		    click = 0;
@@ -451,15 +454,7 @@ function animateIMG( srcList, params ) {
     ret.play = play;
     ret.pause = pause;
     ret.seek = seek;
-    ret.reset = function() {
-	if ( myInterval ) {
-	    clearInterval( myInterval );
-	}
-	parent.replaceChild( saveimg, curimg );
-	panel.removeChild( controls );
-	panel.onmouseover = saveonmouseover;
-	panel.onmouseout = saveonmouseout;
-    }
+    ret.reset = reset;
     return ret;
 
     /* Now define the various methods. */
@@ -600,6 +595,7 @@ function animateIMG( srcList, params ) {
     /* Function to perform scrolling.  It changes the scrolling state
        to true, which interrupts whilePlaying(). */
     function startScrolling( event ) {
+	event = event || window.event;
 	if ( event.which == 1 ) {
 	    scrolling = true;
 	    scrollcount = Math.round( ( event.offsetX - 2 )/sliderstep );
@@ -615,6 +611,7 @@ function animateIMG( srcList, params ) {
     /* Function to resume playback after scrolling, if it had been
        playing before the scrolling started. */
     function stopScrolling( event ) {
+	event = event || window.event;
 	if ( scrolling && event.which == 1 ) {
 	    scrolling = false;
 	    if ( !ret.paused ) {
@@ -678,29 +675,37 @@ function animateIMG( srcList, params ) {
 	ret.paused = false;
 	button1.src = dir + "rr.png";
 	button1.onmousedown = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = -ret.speedup; }
 	};
 	button1.onmouseenter = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = -ret.speedup; }
 	};
 	button1.onmouseup = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = 1; }
 	};
 	button1.onmouseleave = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = 1; }
 	};
 	button2.src = dir + "pause.png";
 	button2.onclick = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { pause(); }
 	};
 	button3.src = dir + "ff.png";
 	button3.onmousedown = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = ret.speedup; }
 	};
 	button3.onmouseenter = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = ret.speedup; }
 	};
 	button3.onmouseup = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { ret.stride = 1; }
 	};
 	button3.onmouseleave = function( event ) {
@@ -719,16 +724,29 @@ function animateIMG( srcList, params ) {
 	ret.paused = true;
 	button1.src = dir + "rstep.png";
 	button1.onclick = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { seek( ret.count - 1 ); }
 	};
 	button2.src = dir + "play.png";
 	button2.onclick = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { play(); }
 	};
 	button3.src = dir + "fstep.png";
 	button3.onclick = function( event ) {
+	    event = event || window.event;
 	    if ( event.which == 1 ) { seek( ret.count + 1 ); }
 	};
+    }
+
+    function reset() {
+	if ( myInterval ) {
+	    clearInterval( myInterval );
+	}
+	parent.replaceChild( saveimg, curimg );
+	panel.removeChild( controls );
+	panel.onmouseover = saveonmouseover;
+	panel.onmouseout = saveonmouseout;
     }
 }
 
@@ -800,10 +818,12 @@ function animateIMGplain( srcList, params ) {
 	   separate mouse events. */
 	if ( clickable ) {
 	    curimg.onmousedown = function( event ) {
+		event = event || window.event;
 		if ( event.which == 1 )
 		    click = 1;
 	    };
 	    curimg.onmouseup = function( event ) {
+		event = event || window.event;
 		if ( event.which == 1 && click ) {
 		    if ( ret.paused ) { play(); } else { pause(); }
 		    click = 0;
@@ -903,4 +923,48 @@ function animateIMGplain( srcList, params ) {
     function pause() {
 	ret.paused = true;
     }
+}
+
+/***********************************************************************
+The bare-bones non-interactive animation I started with.
+***********************************************************************/
+function animateIMGID( srcList, id, cadence ) {
+    var i;                                         // generic index
+    var count = 0;                                 // frame count
+    var max = srcList.length;                      // number of frames
+    var interval = ( cadence > 0 ) ? cadence : 40; // frame iterval
+    var saveimg = document.getElementById( id );   // original image
+    if ( !( saveimg ) || max < 2 )
+	return;
+    var parent = saveimg.parentNode;               // parent of image
+    var curimg;                                    // current frame
+    var images = [];                               // list of frames
+    /* Create list of frames. */
+    for ( i = 0; i < max; i++ ) {
+	curimg = saveimg.cloneNode( false );
+	curimg.onload = imageLoaded;
+	curimg.onerror = imageLoaded;
+	curimg.src = srcList[i];
+	images.push( curimg );
+    }
+    /* Images will load and play in background. */
+    return { reset: function(){ parent.replaceChild( saveimg, curimg ); } };
+
+    /* Play animation after all loads have completed (or failed), */
+    function imageLoaded() {
+	if ( ++count >= max ) {
+	    alert( "Here: " + interval + ", " + max );
+	    count = -1;
+	    curimg = saveimg;
+	    setInterval( whilePlaying, interval );
+	}
+    }
+    /* Display next frame. */
+    function whilePlaying() {
+	if ( ++count >= max )
+	    count = 0;
+	alert( count );
+	parent.replaceChild( images[count], curimg );
+	curimg = images[count];
+    }	
 }

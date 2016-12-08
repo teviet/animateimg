@@ -68,8 +68,8 @@ params.cadence    number   Time in ms between frames (40)
 params.loopcount  number   # of times animation will play (0)
 </code></pre>
 
-<p>Note that a non-positive <em>params</em><code>.loopcount=0</code> means the animation
-will loop indefinitely. Once the animation reaches its designated
+<p>Note that a non-positive <em>params</em><code>.loopcount</code> means the animation will
+loop indefinitely. Once the animation reaches its designated
 loopcount, it will pause; if <em>params</em><code>.clickable</code> is true then
 clicking at the end of a loop sequence will start a new sequence. If
 <em>params</em><code>.clickable</code> is <code>false</code> then <em>params</em><code>.paused</code> is ignored,
@@ -179,16 +179,17 @@ global variable declared in <code>animateimg.js</code>:</p>
 &quot;&quot; means that <code>animateIMG</code> will look for icons in the same directory
 as the page being viewed; relative URLs are also possible. You may
 also create your own icons, either globally or on a per-page or
-per-animation basis.</p>
+per-animation basis. Note that in the current implementation all
+&quot;button&quot; icons will be scaled to 20x20 pixels, while the &quot;bar&quot; icons
+will appear 20px high and stretched to fit the horizontal width of the
+panel.</p>
 
 <h2>Notes</h2>
 
 <p>The function will replace the image element, and set the <code>onmouseover</code>
 and <code>onmouseout</code> properties of the control panel element. These are
-saved and restored if the returned object's <code>reset()</code> method is
-called. Other properties of this element are left unchanged. The
-animation will <em>not</em> inherit the size of the container; use the
-<em>params</em><code>.imclass</code> parameter to apply styles to the animation images.</p>
+saved, and can be restored by calling the returned object's <code>reset()</code>
+method. Other properties of this element are left unchanged.</p>
 
 <p>If <em>srcList</em> contains only a single entry, then <code>animateIMG</code> does not
 perform any animation; it simply replaces the image with that frame.

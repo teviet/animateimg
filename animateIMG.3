@@ -67,8 +67,8 @@ params.loopcount  number   # of times animation will play (0)
 .EE
 .RE
 .PP
-Note that a non-positive \fIparams\fR\fB\fC\[char46]loopcount=0\fR means the animation
-will loop indefinitely. Once the animation reaches its designated
+Note that a non-positive \fIparams\fR\fB\fC\[char46]loopcount\fR means the animation will
+loop indefinitely. Once the animation reaches its designated
 loopcount, it will pause; if \fIparams\fR\fB\fC\[char46]clickable\fR is true then
 clicking at the end of a loop sequence will start a new sequence. If
 \fIparams\fR\fB\fC\[char46]clickable\fR is \fB\fCfalse\fR then \fIparams\fR\fB\fC\[char46]paused\fR is ignored,
@@ -178,17 +178,17 @@ You may edit this as necessary for your own installation. A value of
 "" means that \fB\fCanimateIMG\fR will look for icons in the same directory
 as the page being viewed; relative URLs are also possible. You may
 also create your own icons, either globally or on a per-page or
-per-animation basis.
+per-animation basis. Note that in the current implementation all
+"button" icons will be scaled to 20x20 pixels, while the "bar" icons
+will appear 20px high and stretched to fit the horizontal width of the
+panel.
 .SH  "NOTES"
 .PP
 The function will replace the image element, and set the \fB\fConmouseover\fR
 and \fB\fConmouseout\fR properties of the control panel element. These are
-saved and restored if the returned object's 
+saved, and can be restored by calling the returned object's 
 .BR \fB\fCreset ()\fR
-method is
-called. Other properties of this element are left unchanged. The
-animation will \fInot\fR inherit the size of the container; use the
-\fIparams\fR\fB\fC\[char46]imclass\fR parameter to apply styles to the animation images.
+method. Other properties of this element are left unchanged.
 .PP
 If \fIsrcList\fR contains only a single entry, then \fB\fCanimateIMG\fR does not
 perform any animation; it simply replaces the image with that frame.
