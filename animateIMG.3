@@ -88,11 +88,41 @@ Parameter         Type     Description
 ----------------------------------------------------------------
 params.panel      element  Element to place controls
 params.panelID    string   ID of element to place controls
-parame.icons      string   directory containing button icons (.)
+parame.icons      string   Directory with button icons ("")
 params.speedup    number   Frame stride in fast-forward (5)
 parame.hidden     boolean  Show panel only when hovering (false)
 .EE
 .RE
+.SS  "Features"
+.PP
+Unlike a true video player, 
+.BR \fB\fCanimateIMG ()\fR
+does not employ any
+differential compression beyond what is used on the individual frame
+images. This makes frame-by-frame animations more bandwidth-intensive
+than similarly-sized videos, and thus suited primarily for animated
+icons or short clips. However, 
+.BR \fB\fCanimateIMG ()\fR
+can also achieve
+effects not easily achievable with video players. For example, an
+animation of semitransparent PNGs can be overlaid on a background
+image or pattern.
+.PP
+To prevent the animation from jiggling the document layout, the images
+in \fB\fCsrcList\fR should all be the same size, or the \fB\fC<img>\fR element
+should have explicit dimensions to which the frames will be scaled, or
+the \fB\fC<img>\fR should be positioned in a container large enough to hold
+the largest frame. This is left to the discretion of the user (it may
+be that you \fIwant\fR the layout to adjust as the animation plays)\[char46] Of
+greater concern are "broken" images, which are missing or otherwise
+unable to be loaded. As long as any frames are successfully loaded,
+.BR \fB\fCanimateIMG ()\fR
+will play a full-length animation, padding any gaps
+using adjacent frames. If the animation has a control panel, the gaps
+will be marked in red on the scrollbar. You can see how
+.BR \fB\fCanimateIMG ()\fR
+handles this in the examples below by moving some of
+the images out of the \fB\fCexample\fR subdirectory.
 .SS  "Installing"
 .PP
 To use animations, simply place the \fB\fCanimateimg.js\fR in a
@@ -160,6 +190,7 @@ show the icons properly, and also display the demo animations in the
  (icons/back.png)
  (icons/bar.png)
  (icons/scrollbar.png)
+ (icons/gaps.png)
  (icons/slider.png)
 .PP
 You will likely want to copy these icons to a suitable
@@ -176,7 +207,7 @@ var animateimg_default_icons = "";
 .PP
 You may edit this as necessary for your own installation. A value of
 "" means that \fB\fCanimateIMG\fR will look for icons in the same directory
-as the page being viewed; relative URLs are also possible. You may
+as the page being viewed; relative URLs are also allowed. You may
 also create your own icons, either globally or on a per-page or
 per-animation basis. Note that in the current implementation all
 "button" icons will be scaled to 20x20 pixels, while the "bar" icons
@@ -216,7 +247,9 @@ for ( i = 1; i <= 250; i++ )
 .PP
 The default (looping, click-to-pause) animation simply places these
 images into a specified \fB\fC<img>\fR element, which may or may not already
-have a "preview" image::
+have a "preview" image. (If you are viewing this document as
+\fB\fCREADME.html\fR in a javascript-enabled browser, the demo animation
+should appear below the code snippet.)
 
 .RS
 .EX

@@ -87,9 +87,34 @@ _params_`.container` or _params_`.containerID` is required.
     ----------------------------------------------------------------
     params.panel      element  Element to place controls
     params.panelID    string   ID of element to place controls
-    parame.icons      string   directory containing button icons (.)
+    parame.icons      string   Directory with button icons ("")
     params.speedup    number   Frame stride in fast-forward (5)
     parame.hidden     boolean  Show panel only when hovering (false)
+
+### Features
+
+Unlike a true video player, `animateIMG()` does not employ any
+differential compression beyond what is used on the individual frame
+images.  This makes frame-by-frame animations more bandwidth-intensive
+than similarly-sized videos, and thus suited primarily for animated
+icons or short clips.  However, `animateIMG()` can also achieve
+effects not easily achievable with video players.  For example, an
+animation of semitransparent PNGs can be overlaid on a background
+image or pattern.
+
+To prevent the animation from jiggling the document layout, the images
+in `srcList` should all be the same size, or the `<img>` element
+should have explicit dimensions to which the frames will be scaled, or
+the `<img>` should be positioned in a container large enough to hold
+the largest frame.  This is left to the discretion of the user (it may
+be that you *want* the layout to adjust as the animation plays).  Of
+greater concern are "broken" images, which are missing or otherwise
+unable to be loaded.  As long as any frames are successfully loaded,
+`animateIMG()` will play a full-length animation, padding any gaps
+using adjacent frames.  If the animation has a control panel, the gaps
+will be marked in red on the scrollbar.  You can see how
+`animateIMG()` handles this in the examples below by moving some of
+the images out of the `example` subdirectory.
 
 ### Installing
 
@@ -159,7 +184,8 @@ show the icons properly, and also display the demo animations in the
 [<img src=icons/noloop.png>](icons/noloop.png)<span class=bars>
 [<img src=icons/back.png>](icons/back.png)
 [<img src=icons/bar.png>](icons/bar.png)
-[<img src=icons/scrollbar.png>](icons/scrollbar.png)</span>
+[<img src=icons/scrollbar.png>](icons/scrollbar.png)
+[<img src=icons/gaps.png>](icons/gaps.png)</span>
 [<img src=icons/slider.png>](icons/slider.png)</span>
 
 You will likely want to copy these icons to a suitable
@@ -172,7 +198,7 @@ global variable declared in `animateimg.js`:
 
 You may edit this as necessary for your own installation.  A value of
 "" means that `animateIMG` will look for icons in the same directory
-as the page being viewed; relative URLs are also possible.  You may
+as the page being viewed; relative URLs are also allowed.  You may
 also create your own icons, either globally or on a per-page or
 per-animation basis.  Note that in the current implementation all
 "button" icons will be scaled to 20x20 pixels, while the "bar" icons
@@ -213,7 +239,9 @@ for ( i = 1; i <= 250; i++ )
 
 The default (looping, click-to-pause) animation simply places these
 images into a specified `<img>` element, which may or may not already
-have a "preview" image::
+have a "preview" image.  (If you are viewing this document as
+`README.html` in a javascript-enabled browser, the demo animation
+should appear below the code snippet.)
 
     <img id="im1" src="example/preview1.png">
     <script>

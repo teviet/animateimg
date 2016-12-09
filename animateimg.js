@@ -114,9 +114,34 @@ _params_`.container` or _params_`.containerID` is required.
     ----------------------------------------------------------------
     params.panel      element  Element to place controls
     params.panelID    string   ID of element to place controls
-    parame.icons      string   directory containing button icons (.)
+    parame.icons      string   Directory with button icons ("")
     params.speedup    number   Frame stride in fast-forward (5)
     parame.hidden     boolean  Show panel only when hovering (false)
+
+### Features
+
+Unlike a true video player, `animateIMG()` does not employ any
+differential compression beyond what is used on the individual frame
+images.  This makes frame-by-frame animations more bandwidth-intensive
+than similarly-sized videos, and thus suited primarily for animated
+icons or short clips.  However, `animateIMG()` can also achieve
+effects not easily achievable with video players.  For example, an
+animation of semitransparent PNGs can be overlaid on a background
+image or pattern.
+
+To prevent the animation from jiggling the document layout, the images
+in `srcList` should all be the same size, or the `<img>` element
+should have explicit dimensions to which the frames will be scaled, or
+the `<img>` should be positioned in a container large enough to hold
+the largest frame.  This is left to the discretion of the user (it may
+be that you *want* the layout to adjust as the animation plays).  Of
+greater concern are "broken" images, which are missing or otherwise
+unable to be loaded.  As long as any frames are successfully loaded,
+`animateIMG()` will play a full-length animation, padding any gaps
+using adjacent frames.  If the animation has a control panel, the gaps
+will be marked in red on the scrollbar.  You can see how
+`animateIMG()` handles this in the examples below by moving some of
+the images out of the `example` subdirectory.
 
 ### Installing
 
@@ -186,7 +211,8 @@ show the icons properly, and also display the demo animations in the
 [<img src=icons/noloop.png>](icons/noloop.png)<span class=bars>
 [<img src=icons/back.png>](icons/back.png)
 [<img src=icons/bar.png>](icons/bar.png)
-[<img src=icons/scrollbar.png>](icons/scrollbar.png)</span>
+[<img src=icons/scrollbar.png>](icons/scrollbar.png)
+[<img src=icons/gaps.png>](icons/gaps.png)</span>
 [<img src=icons/slider.png>](icons/slider.png)</span>
 
 You will likely want to copy these icons to a suitable
@@ -208,7 +234,7 @@ var animateimg_default_icons = "";
 
 You may edit this as necessary for your own installation.  A value of
 "" means that `animateIMG` will look for icons in the same directory
-as the page being viewed; relative URLs are also possible.  You may
+as the page being viewed; relative URLs are also allowed.  You may
 also create your own icons, either globally or on a per-page or
 per-animation basis.  Note that in the current implementation all
 "button" icons will be scaled to 20x20 pixels, while the "bar" icons
@@ -249,7 +275,9 @@ for ( i = 1; i <= 250; i++ )
 
 The default (looping, click-to-pause) animation simply places these
 images into a specified `<img>` element, which may or may not already
-have a "preview" image::
+have a "preview" image.  (If you are viewing this document as
+`README.html` in a javascript-enabled browser, the demo animation
+should appear below the code snippet.)
 
     <img id="im1" src="example/preview1.png">
     <script>
@@ -403,6 +431,7 @@ function animateIMG( srcList, params ) {
     var button6 = document.createElement( "IMG" );   // loop/noloop
     var scrollbar = document.createElement( "IMG" ); // scrollbar
     var slider = document.createElement( "IMG" );    // scrolling slider
+    var gaps = document.createElement( "IMG" );      // missing frames
     button1.src = dir + "rr.png";
     button2.src = dir + "pause.png";
     button3.src = dir + "ff.png";
@@ -414,35 +443,16 @@ function animateIMG( srcList, params ) {
 	button6.src = dir + "noloop.png";
     scrollbar.src = dir + "scrollbar.png";
     slider.src = dir + "slider.png";
+    gaps.src = dir + "gaps.png";
 
     /* Start loading images.  The imageLoaded() callback will handle
-       starting the animation once everything is loaded. */
+       starting the animation once everything is loaded.  The
+       clickToPause() function sets up the image's mouse events. */
     for ( i = 0; i < ret.max; i++ ) {
 	curimg = saveimg.cloneNode( false );
 	curimg.onload = imageLoaded;
-	curimg.onerror = imageLoaded;
-	/* Clicking on the animation may well produce a mousedown and
-	   mouseup event in different image frames, and neither frame
-	   (nor their parent) will register this as a "click".  So we
-	   have to use the click variable to keep track of the
-	   separate mouse events. */
-	if ( clickable ) {
-	    curimg.onmousedown = function( event ) {
-		event = event || window.event;
-		if ( event.which == 1 )
-		    click = 1;
-	    };
-	    curimg.onmouseup = function( event ) {
-		event = event || window.event;
-		if ( event.which == 1 && click ) {
-		    if ( ret.paused ) { play(); } else { pause(); }
-		    click = 0;
-		}
-	    };
-	    curimg.onmouseout = function() {
-		click = 0;
-	    };
-	}
+	curimg.onerror = imageMissing;
+	clickToPause( curimg );
 	curimg.src = srcList[i];
 	images.push( curimg );
     }
@@ -459,15 +469,65 @@ function animateIMG( srcList, params ) {
 
     /* Now define the various methods. */
 
-    /* The imageLoaded() callback lengthens the progress bar as each
-       image is loaded.  When the final image is loaded, it replaces
-       the progress bar with the control buttons, and starts the
-       animation. */
+    /* The clickToPause() function sets up the mouse events on element
+       so that, if params.clickable is true, then clicking on the
+       element pauses/unpauses the animation.  We can't just use the
+       onclick property, because clicking on a running animation will
+       usually generate separate "mousedown" and "mouseup" events in
+       different frame objects, and may not generate an actual "click"
+       event in any object.  So we use the click variable to keep
+       track of the separate mouse events. */
+    function clickToPause( element ) {
+	if ( clickable ) {
+	    element.onmousedown = function( event ) {
+		event = event || window.event;
+		if ( event.which == 1 )
+		    click = 1;
+	    };
+	    element.onmouseup = function( event ) {
+		event = event || window.event;
+		if ( event.which == 1 && click ) {
+		    if ( ret.paused ) { play(); } else { pause(); }
+		    click = 0;
+		}
+	    };
+	    element.onmouseout = function() {
+		click = 0;
+	    };
+	}
+    }
+
+    /* The imageMissing() callback is called when an image load fails.
+       It removes the image from the list of images before proceeding
+       with imageLoaded().  (This works around the fact that the
+       "complete" property of an image will be set to true whether
+       loading succeeds or fails.) */
+    function imageMissing( event ) {
+	event = event || window.event;
+	for ( i = 0; i < ret.max; i++ )
+	    if ( images[i] == event.target )
+		images[i] = undefined;
+	imageLoaded();
+    }
+
+    /* The imageLoaded() callback is called whenever an image is
+       loaded or fails to load (in the latter case this function
+       should have been called from the imageMissing() function).  It
+       lengthens the progress bar as each image is loaded.  When the
+       final image is loaded, it replaces the progress bar with the
+       control buttons, and starts the animation. */
     function imageLoaded() {
 	/* Note that ret.count keeps track of number of images loaded.
 	   After all images have been loaded, it will be retasked to
 	   keep track of current playback frame, */
 	ret.count++;
+
+	/* Update the progress bar; noting that the panel width itself
+	   may change asynchronously and should be rechecked each
+	   time.  Specifically, the panel width may depend on the
+	   original "preview" image, which loads concurrently with the
+	   animation images, and thus won't be known in advance of
+	   starting the download. */
 	panelWidth = panel.offsetWidth;
 	back.style.width = panelWidth + "px";
 	bar.style.width = panelWidth*ret.count/ret.max + "px";
@@ -477,9 +537,19 @@ function animateIMG( srcList, params ) {
 	   slider, set up all the mouse events), and start
 	   animation. */
 	if ( ret.count >= ret.max ) {
-	    /* Set initial image. */
-	    parent.replaceChild( images[0], saveimg );
-	    curimg = images[0];
+
+	    /* Place first image, in case that changes the panel
+	       width.  Quit if no images were successfully loaded. */
+	    for ( i = 0; i < ret.max; i++ )
+		if ( images[i] )
+		    break;
+	    if ( i < ret.max ) {
+		parent.replaceChild( images[i], saveimg );
+		curimg = images[i];
+	    } else {
+		panel.removeChild( controls );
+		return;
+	    }
 
 	    /* Clear progress bar from panel.  Also, if panel is the
 	       same as the frame, make it visible only when you mouse
@@ -508,17 +578,17 @@ function animateIMG( srcList, params ) {
 		    button3.style.position = button4.style.position =
 		    button5.style.position = button6.style.position =
 		    slider.style.position = scrollbar.style.position =
-		    "absolute";
+		    gaps.style.position = "absolute";
 		button1.style.bottom = button2.style.bottom =
 		    button3.style.bottom = button4.style.bottom =
 		    button5.style.bottom = button6.style.bottom =
 		    slider.style.bottom = scrollbar.style.bottom =
-		    "0px";
+		    gaps.style.bottom = "0px";
 		button1.style.height = button2.style.height =
 		    button3.style.height = button4.style.height =
 		    button5.style.height = button6.style.height =
 		    slider.style.height = scrollbar.style.height =
-		    "20px";
+		    gaps.style.height = "20px";
 		button1.style.width = button2.style.width =
 		    button3.style.width = button4.style.width =
 		    button5.style.width = button6.style.width =
@@ -584,6 +654,41 @@ function animateIMG( srcList, params ) {
 		   make do with an uncontrolled animation. */
 		controls.removeChild( back );
 	    }
+
+	    /* Check for images where load failed.  Rather than
+	       display broken images, "freeze" the animation over
+	       missing images, and note the gaps in the scroll bar. */
+	    if ( i > 0 ) {
+		for ( j = 0; j < i; j++ ) {
+		    images[j] = curimg.cloneNode( false );
+		    clickToPause( images[j] );
+		}
+		if ( panelWidth > 124 ) {
+		    var xf = ( i >= ret.max ) ? panelWidth - 60 :
+			62 + ( i - 0.5 )*sliderstep;
+		    var gap = gaps.cloneNode( false );
+		    gap.style.left = "60px";
+		    gap.style.width = ( xf - 60 ) + "px";
+		    controls.appendChild( gap );
+		}
+	    }
+	    for ( i++; i < ret.max; i++ )
+		if ( !( images[i] ) ) {
+		    for ( j = i; j < ret.max && !( images[j] ); j++ ) {
+			images[j] = images[i-1].cloneNode( false );
+			clickToPause( images[j] );
+		    }
+		    if ( panelWidth > 124 ) {
+			var xi = 62 + ( i - 0.5 )*sliderstep;
+			var xf = ( j >= ret.max ) ? panelWidth - 60 :
+			    62 + ( j - 0.5 )*sliderstep;
+			var gap = gaps.cloneNode( false );
+			gap.style.left = xi + "px";
+			gap.style.width = ( xf - xi ) + "px";
+			controls.insertBefore( gap, slider );
+		    }
+		    i = j;
+		}
 
 	    /* Start animation.  The count now keeps track of the
 	       current frame. */
@@ -806,33 +911,13 @@ function animateIMGplain( srcList, params ) {
     }
 
     /* Start loading images.  The imageLoaded() callback will handle
-       starting the animation once everything is loaded. */
+       starting the animation once everything is loaded.  The
+       clickToPause() function sets up the image's mouse events. */
     for ( i = 0; i < ret.max; i++ ) {
 	curimg = saveimg.cloneNode( false );
 	curimg.onload = imageLoaded;
-	curimg.onerror = imageLoaded;
-	/* Clicking on the animation may well produce a mousedown and
-	   mouseup event in different image frames, and neither frame
-	   (nor their parent) will register this as a "click".  So we
-	   have to use the click variable to keep track of the
-	   separate mouse events. */
-	if ( clickable ) {
-	    curimg.onmousedown = function( event ) {
-		event = event || window.event;
-		if ( event.which == 1 )
-		    click = 1;
-	    };
-	    curimg.onmouseup = function( event ) {
-		event = event || window.event;
-		if ( event.which == 1 && click ) {
-		    if ( ret.paused ) { play(); } else { pause(); }
-		    click = 0;
-		}
-	    };
-	    curimg.onmouseout = function() {
-		click = 0;
-	    };
-	}
+	curimg.onerror = imageMissing;
+	clickToPause( curimg );
 	curimg.src = srcList[i];
 	images.push( curimg );
     }
@@ -854,15 +939,82 @@ function animateIMGplain( srcList, params ) {
 
     /* Now define the various methods. */
 
-    /* The imageLoaded() callback starts animation only after all
-       images have been loaded.  Note that ret.count keeps track of
-       number of images loaded.  After all images have been loaded, it
-       will be retasked to keep track of current playback frame, */
+    /* The clickToPause() function sets up the mouse events on element
+       so that, if params.clickable is true, then clicking on the
+       element pauses/unpauses the animation.  We can't just use the
+       onclick property, because clicking on a running animation will
+       usually generate separate "mousedown" and "mouseup" events in
+       different frame objects, and may not generate an actual "click"
+       event in any object.  So we use the click variable to keep
+       track of the separate mouse events. */
+    function clickToPause( element ) {
+	if ( clickable ) {
+	    element.onmousedown = function( event ) {
+		event = event || window.event;
+		if ( event.which == 1 )
+		    click = 1;
+	    };
+	    element.onmouseup = function( event ) {
+		event = event || window.event;
+		if ( event.which == 1 && click ) {
+		    if ( ret.paused ) { play(); } else { pause(); }
+		    click = 0;
+		}
+	    };
+	    element.onmouseout = function() {
+		click = 0;
+	    };
+	}
+    }
+
+    /* The imageMissing() callback is called when an image load fails.
+       It removes the image from the list of images before proceeding
+       with imageLoaded().  (This works around the fact that the
+       "complete" property of an image will be set to true whether
+       loading succeeds or fails.) */
+    function imageMissing( event ) {
+	event = event || window.event;
+	for ( i = 0; i < ret.max; i++ )
+	    if ( images[i] == event.target )
+		images[i] = undefined;
+	imageLoaded();
+    }
+
+    /* The imageLoaded() callback is called whenever an image is
+       loaded or fails to load (in the latter case this function
+       should have been called from the imageMissing() function).  It
+       starts animation only after all images have been loaded.  Note
+       that ret.count keeps track of number of images loaded.  After
+       all images have been loaded, it will be retasked to keep track
+       of current playback frame, */
     function imageLoaded() {
 	ret.count++;
 	if ( ret.count >= ret.max ) {
-	    parent.replaceChild( images[0], saveimg );
-	    curimg = images[0];
+	    /* Place first image, or quit if none were loaded. */
+	    for ( i = 0; i < ret.max; i++ )
+		if ( images[i] )
+		    break;
+	    if ( i < ret.max ) {
+		parent.replaceChild( images[i], saveimg );
+		curimg = images[i];
+	    } else
+		return;
+	    /* Fill in any gaps of missing images. */
+	    if ( i > 0 ) {
+		for ( j = 0; j < i; j++ ) {
+		    images[j] = curimg.cloneNode( false );
+		    clickToPause( images[j] );
+		}
+	    }
+	    for ( i++; i < ret.max; i++ )
+		if ( !( images[i] ) ) {
+		    for ( j = i; j < ret.max && !( images[j] ); j++ ) {
+			images[j] = images[i-1].cloneNode( false );
+			clickToPause( images[j] );
+		    }
+		    i = j;
+		}
+	    /* Start animation. */
 	    ret.count = 0;
 	    play();
 	}
@@ -926,7 +1078,7 @@ function animateIMGplain( srcList, params ) {
 }
 
 /***********************************************************************
-The bare-bones non-interactive animation I started with.
+Bare-bones non-interactive animation, similar to what I started with.
 ***********************************************************************/
 function animateIMGID( srcList, id, cadence ) {
     var i;                                         // generic index
